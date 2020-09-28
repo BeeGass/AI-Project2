@@ -6,11 +6,11 @@ groupName = "Sigmoid"
 
 def main():
     board = Board()
-    result = playGame(board) #0 for tie, 1 for AI player wins, 2 for opposing player wins
+    result = PlayGame(board) #0 for tie, 1 for AI player wins, 2 for opposing player wins
 
 #Function which will play the Gomoku game until completion
 #board: An array represetnation of the game board
-def playGame(board):
+def PlayGame(board):
     while not path.exists(groupName+".go"): #waits until it is the player's move
        pass
     if path.exists("endgame"):
@@ -22,7 +22,7 @@ def playGame(board):
         f = open("move_file", "rw")
 
         #make move here
-        playGame() #repeats until game completion
+        PlayGame() #repeats until game completion
 
 def MiniMax(inputPosition, inputDepth, inputMaximizingPlayer):
 
@@ -96,14 +96,40 @@ def MonteCarloTreeSearch():
     return 1
 
 #------------------------------------------------------------------
-##function to read in move_file to determind moves made from opposing agent 
-def readFile():
+##Calcultes the utility for home team agent 
+def CalculateSelfUtility():
+
     return 1
+
+##Calcultes the utility for away team agent
+def CalculateOpposingUtility():
+
+    return 1
+
+#------------------------------------------------------------------
+##function to read in move_file to determind moves made from opposing agent 
+def ReadFile():
+    return 1
+
+##inputCol is the number associated with the column 
+#that the agent gives which NumberToLetter translates 
+#into a capital letter associated with the number
+#example: 1->A 
+#         2->B
+#         3->C
+def NumberToLetter(inputCol):
+    theLetter = chr(ord('@') + inputCol)
+    return theLetter
 
 ##function to output file with the move of our agent
 #format: <groupname> <column> <row>
-def outputFile():
-    return 1
+def OutputFile(inputRow, inputCol):
+    f = open("move_file", "w")
+    f.write("Sigmoid {} {}\n".format(inputCol, inputRow))
+    f.close
+
+    return f
 
 def main():
+
     return 1

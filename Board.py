@@ -26,6 +26,7 @@ class Move: #class representing a move made by either player
     row: int #the row the piece was placed in
     col: int #the column the piece was placed in
     utility: float #the utility represented by the move
+
     def __init__(self, player, row, col, utility):
         self.player = player
         self.row = row
