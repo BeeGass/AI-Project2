@@ -5,7 +5,7 @@ groupName = "Sigmoid"
 
 def main():
     board = Board()
-    playGame(board)
+    result = playGame(board) #0 for tie, 1 for AI player wins, 2 for opposing player wins
 
 #Function which will play the Gomoku game until completion
 #board: An array represetnation of the game board
@@ -15,6 +15,7 @@ def playGame(board):
     if path.exists("endgame"):
         #end of game
         print("End of game")
+        return 0
     else:
         #read opponent's move here
         f = open("move_file", "rw")
