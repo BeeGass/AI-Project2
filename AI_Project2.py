@@ -26,7 +26,7 @@ def PlayGame(board):
             col = lines[2]
             board.placePiece(row, col, 0, 2) #makes opponent move
         #make move here
-        PlayGame() #repeats until game completion
+        PlayGame(board) #repeats until game completion
 
 def MiniMax(inputPosition, inputDepth, inputMaximizingPlayer):
 
