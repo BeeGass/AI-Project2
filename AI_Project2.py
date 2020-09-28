@@ -11,16 +11,20 @@ def main():
 #Function which will play the Gomoku game until completion
 #board: An array represetnation of the game board
 def playGame(board):
-    while not path.exists(groupName+".go"): #waits until it is the player's move
-       pass
+    #while not path.exists(groupName+".go"): #waits until it is the player's move
+    #   pass
     if path.exists("endgame"):
         #end of game
         print("End of game")
         return 0
     else:
         #read opponent's move here
-        f = open("move_file", "rw")
-
+        f = open("move_file").read()
+        if f not None:
+            lines = f.split()
+            row = lines[1]
+            col = lines[2]
+            #board.placePiece(row, col, 2) #makes opponent move
         #make move here
         playGame() #repeats until game completion
 
@@ -105,5 +109,4 @@ def readFile():
 def outputFile():
     return 1
 
-def main():
-    return 1
+main()
