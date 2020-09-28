@@ -14,9 +14,10 @@ def playGame():
     else:
         #read opponent's move here
         #make move here
-        playGame() #repeats until game completionPsuedo code for MiniMax
+        playGame() #repeats until game completion
 
-function Minimax(position, depth, maximizingPlayer)
+def MiniMax(position, depth, alpha, deta, maximizingPlayer):
+    """
     if depth == 0 or game over in position then
         return static evaluation of position
     if maximizingPlayer then
@@ -31,11 +32,12 @@ function Minimax(position, depth, maximizingPlayer)
         eval = Minimax(child, depth-1, true)
         minEval = min(minEval, eval)
         return minEval
+    """
+    return 1
+   
 
-
-Psuedo code for alpha beta pruning
-
-function Minimax(position, depth, alpha, deta, maximizingPlayer)
+def AlphaBetaPruning():
+    """
     if depth == 0 or game over in position then
         return static evaluation of position
     if maximizingPlayer then
@@ -50,12 +52,7 @@ function Minimax(position, depth, alpha, deta, maximizingPlayer)
         minEval = min(minEval, eval) beta= max(beta, eval)
     if beta ≤ alpha break
         return minEval
-"""
-
-def MiniMax():
-    return 1
-
-def AlphaBetaPruning():
+    """
     return 1
 
 #------------------------------------------------------------------
