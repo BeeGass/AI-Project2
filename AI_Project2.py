@@ -3,9 +3,13 @@ from os import path
 groupName = "Sigmoid"
 
 def main():
-    playGame()
+    boardSize = 15
+    
+    playGame(board)
 
-def playGame():
+#Function which will play the Gomoku game until completion
+#board: An array represetnation of the game board
+def playGame(board):
     while not path.exists(groupName+".go"): #waits until it is the player's move
        pass
     if path.exists("endgame"):
