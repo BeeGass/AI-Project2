@@ -1,11 +1,10 @@
 import os.path
 from os import path
-import Board
+from Board import Board
 groupName = "Sigmoid"
 
 def main():
-    boardSize = 15
-    board = Board
+    board = Board()
     playGame(board)
 
 #Function which will play the Gomoku game until completion
@@ -18,6 +17,8 @@ def playGame(board):
         print("End of game")
     else:
         #read opponent's move here
+        f = open("move_file", "rw")
+
         #make move here
         playGame() #repeats until game completion
 
@@ -93,5 +94,4 @@ def readFile():
 def outputFile():
     return 1
 
-def main():
-    return 1
+main()

@@ -2,7 +2,7 @@ class Board:
     boardSize = 15
     board: list
     def __init__(self):
-        self.board = [[0 for x in range(boardSize)] for y in range(boardSize)]
+        self.board = [[0 for x in range(self.boardSize)] for y in range(self.boardSize)]
         #initializes a 15x15 board
         #0 represents an empty space, 1 represents a space occupied by the AI player, and 2 represents a space occupied by the
         #opposing player
