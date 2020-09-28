@@ -19,12 +19,12 @@ def PlayGame(board):
         return 0
     else:
         #read opponent's move here
-        f = open("move_file").read()
-        if f not None:
+        if path.exists("move_file"):
+            f = open("move_file").read()
             lines = f.split()
-            row = lines[1]
+            row = NumberToLetter(lines[1])
             col = lines[2]
-            #board.placePiece(row, col, 2) #makes opponent move
+            board.placePiece(row, col, 0, 2) #makes opponent move
         #make move here
         PlayGame() #repeats until game completion
 
