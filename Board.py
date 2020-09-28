@@ -13,7 +13,7 @@ class Board:
     #row: The row
     #col: The column
     #Player: 1 if AI player, 2 if opponent
-    def placePiece(row, col, player):
+    def placePiece(row, col, utility, player):
         global selfMoves
         board[row,col] = player
         if player == 1:
