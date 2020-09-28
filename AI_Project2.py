@@ -1,5 +1,6 @@
 import os.path
 from os import path
+import math
 groupName = "Sigmoid"
 
 def main():
@@ -20,44 +21,50 @@ def playGame(board):
         #make move here
         playGame() #repeats until game completion
 
-def MiniMax(position, depth, alpha, deta, maximizingPlayer):
-    """
-    if depth == 0 or game over in position then
-        return static evaluation of position
-    if maximizingPlayer then
-        maxEval = −∞
-        each child in position
-        eval = Minimax(child, depth-1, false)
-        maxEval = max(maxEval, eval)
-        return maxEval
-    else
-        minEval = +∞
-        each child in position
-        eval = Minimax(child, depth-1, true)
-        minEval = min(minEval, eval)
-        return minEval
-    """
-    return 1
+def MiniMax(inputPosition, inputDepth, inputMaximizingPlayer):
+
+    #if the input depth is met or the game is over out put the evaluation of how good the move last made was
+    if inputDepth == 0 or gameOver:
+        return positionEval
+
+    if inputMaximizingPlayer: 
+        maxEval = -math.INF
+
+        for child in inputPosition:
+            eval = MiniMax(child, inputDepth - 1, false)
+            maxmaxEval = max(maxEval, eval)
+            return maxEval
+    else:
+        minEval = math.inf
+        for child in inputPosition:
+            eval = MiniMax(child, depth - 1, true)
+            minEval = min(minEval, eval)
+            return minEval
    
 
-def AlphaBetaPruning():
-    """
-    if depth == 0 or game over in position then
-        return static evaluation of position
-    if maximizingPlayer then
-        each child in position
-        eval = Minimax(child, depth-1, false)
-        maxEval = max(maxEval, eval) alpha= max(alpha, eval)
-        if beta ≤ alpha break
+def AlphaBetaPruning(inputPosition, inputDepth, inputAlpha, inputDeta, inputMaximizingPlayer):
+    if inputDepth == 0 or gameOver:
+        return positionEval
+
+    if inputMaximizingPlayer: 
+        for child in inputPosition:
+            eval = Minimax(child, inputDepth - 1, false)
+            maxEval = max(maxEval, eval) 
+
+            alpha = max(alpha, eval)
+            if beta <= alpha: 
+                break
+
             return maxEval
-    else
-        each child in position
-        eval = Minimax(child, depth-1, true)
-        minEval = min(minEval, eval) beta= max(beta, eval)
-    if beta ≤ alpha break
-        return minEval
-    """
-    return 1
+    else:
+        for child in inputPosition:
+            eval = Minimax(child, inputDepth - 1, true)
+            minEval = min(minEval, eval) 
+
+            beta = max(beta, eval)
+            if beta <= alpha:
+                break
+            return minEval
 
 #------------------------------------------------------------------
 #Heuristics that limit the depth to which the game tree is expanded
