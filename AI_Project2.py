@@ -83,15 +83,18 @@ def HeuristicContinuation():
 
 #------------------------------------------------------------------
 #Heuristics that limit the branching factor of the game tree
+
 def TaperedSearch():
     return 1
 
 #------------------------------------------------------------------
+#Big Boi Algorithm 
+#https://en.wikipedia.org/wiki/Monte_Carlo_tree_search
 
-##function to determine if its our agents turn
-def isOurTurn():
+def MonteCarloTreeSearch():
     return 1
 
+#------------------------------------------------------------------
 ##function to read in move_file to determind moves made from opposing agent 
 def readFile():
     return 1
