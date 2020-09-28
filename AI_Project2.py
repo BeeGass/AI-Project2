@@ -1,10 +1,11 @@
 import os.path
 from os import path
+import Board
 groupName = "Sigmoid"
 
 def main():
     boardSize = 15
-    
+    board = Board
     playGame(board)
 
 #Function which will play the Gomoku game until completion
