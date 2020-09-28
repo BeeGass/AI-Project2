@@ -34,7 +34,7 @@ def MiniMax(inputPosition, inputDepth, inputMaximizingPlayer):
     if inputDepth == 0 or gameOver:
         return positionEval
 
-    if inputMaximizingPlayer: 
+    if inputMaximizingPlayer: #this is a boolean value
         maxEval = -math.INF
 
         for child in inputPosition:
