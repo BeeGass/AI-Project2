@@ -121,9 +121,15 @@ def ReadFile():
 #example: 1->A 
 #         2->B
 #         3->C
-def NumberToLetter(inputCol):
-    theLetter = chr(ord('@') + inputCol)
+def NumberToLetter(inputColAsNumber):
+    theLetter = chr(ord('@') + inputColAsNumber)
     return theLetter
+
+##The opposite of NumberToLetter. It takes in a letter and converts it 
+#into a number
+def LetterToNumber(inputColAsLetter):
+    theNumber = ord(inputColAsLetter) - ord('@')
+    return theNumber
 
 ##function to output file with the move of our agent
 #format: <groupname> <column> <row>
