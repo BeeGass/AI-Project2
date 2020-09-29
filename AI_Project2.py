@@ -22,8 +22,8 @@ def PlayGame(board):
         if path.exists("move_file"):
             f = open("move_file").read()
             lines = f.split()
-            row = NumberToLetter(lines[1])
-            col = lines[2]
+            row = LetterToNumber(lines[1])
+            col = int(lines[2])
             board.placePiece(row, col, 0, 2) #makes opponent move
         #make move here
         PlayGame(board) #repeats until game completion
