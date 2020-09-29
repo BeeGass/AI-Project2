@@ -28,10 +28,22 @@ def PlayGame(board):
         #make move here
         PlayGame() #repeats until game completion
 
+#------------------------------------------------------------------
+##Calcultes the utility for home team agent 
+def CalculateSelfUtility():
+
+    return 1
+
+##Calcultes the utility for away team agent
+def CalculateOpposingUtility():
+
+    return 1
+
 def MiniMax(inputPosition, inputDepth, inputMaximizingPlayer):
 
     #if the input depth is met or the game is over out put the evaluation of how good the move last made was
     if inputDepth == 0 or gameOver:
+        positionEval = CalculateSelfUtility()
         return positionEval
 
     if inputMaximizingPlayer: #this is a boolean value
@@ -39,7 +51,7 @@ def MiniMax(inputPosition, inputDepth, inputMaximizingPlayer):
 
         for child in inputPosition:
             eval = MiniMax(child, inputDepth - 1, false)
-            maxmaxEval = max(maxEval, eval)
+            maxEval = max(maxEval, eval)
             return maxEval
     else:
         minEval = math.inf
@@ -49,13 +61,14 @@ def MiniMax(inputPosition, inputDepth, inputMaximizingPlayer):
             return minEval
    
 
-def AlphaBetaPruning(inputPosition, inputDepth, inputAlpha, inputDeta, inputMaximizingPlayer):
+def AlphaBetaPruning(inputPosition, inputDepth, inputAlpha, inputBeta, inputMaximizingPlayer):
     if inputDepth == 0 or gameOver:
+        positionEval = CalculateSelfUtility()
         return positionEval
 
     if inputMaximizingPlayer: 
         for child in inputPosition:
-            eval = Minimax(child, inputDepth - 1, false)
+            eval = Minimax(child, inputDepth - 1, inputAlpha, inputBeta, false)
             maxEval = max(maxEval, eval) 
 
             alpha = max(alpha, eval)
@@ -65,7 +78,7 @@ def AlphaBetaPruning(inputPosition, inputDepth, inputAlpha, inputDeta, inputMaxi
             return maxEval
     else:
         for child in inputPosition:
-            eval = Minimax(child, inputDepth - 1, true)
+            eval = Minimax(child, inputDepth - 1, inputAlpha, inputBeta, true)
             minEval = min(minEval, eval) 
 
             beta = max(beta, eval)
@@ -97,16 +110,6 @@ def TaperedSearch():
 #https://en.wikipedia.org/wiki/Monte_Carlo_tree_search
 
 def MonteCarloTreeSearch():
-    return 1
-
-#------------------------------------------------------------------
-##Calcultes the utility for home team agent 
-def CalculateSelfUtility():
-
-    return 1
-
-##Calcultes the utility for away team agent
-def CalculateOpposingUtility():
 
     return 1
 
