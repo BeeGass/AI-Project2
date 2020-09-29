@@ -4,6 +4,8 @@ from Board import Board
 import math
 groupName = "Sigmoid"
 
+moveNum = 0 #The move number in the game
+
 def main():
     board = Board()
     result = PlayGame(board) #0 for tie, 1 for AI player wins, 2 for opposing player wins
@@ -11,6 +13,7 @@ def main():
 #Function which will play the Gomoku game until completion
 #board: An array represetnation of the game board
 def PlayGame(board):
+    global moveNum
     #while not path.exists(groupName+".go"): #waits until it is the player's move
     #   pass
     if path.exists("endgame"):
@@ -24,8 +27,10 @@ def PlayGame(board):
             lines = f.split()
             row = LetterToNumber(lines[1])
             col = int(lines[2])
-            board.placePiece(row, col, 0, 2) #makes opponent move
+            board.placePiece(row, col, 0, 2, moveNum) #makes opponent move
+            moveNum += 1
         #make move here
+        moveNum += 1
         PlayGame(board) #repeats until game completion
 
 #------------------------------------------------------------------

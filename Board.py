@@ -7,33 +7,35 @@ class BoardConfiguration:
 
 #Represents the current board state of the game
 class Board:
-    boardConfiguration : BoardConfiguration
-    selfMoves = [] #list representing moves made by the AI player (self)
-    oppMoves = [] #list representing moves made by the opposing player
+    currentGameState : BoardConfiguration
+    savedMovesSelf = [] #list representing moves made by the AI player (self)
+    savedMovesOpp = [] #list representing moves made by the opposing player
     def __init__(self):
-        self.boardConfiguration = BoardConfiguration()
+        self.currentGameState = BoardConfiguration()
 
     #Places a piece on the board
     #row: The row
     #col: The column
     #Player: 1 if AI player, 2 if opponent
-    def placePiece(self, row, col, utility, player):
-        self.boardConfiguration.boardList[row][col] = player
+    def placePiece(self, row, col, utility, player, moveNum):
+        self.currentGameState.boardList[row][col] = player
         if player == 1:
-            self.selfMoves.append(Move(player, row, col, utility, self.boardConfiguration))
+            self.savedMovesSelf.append(Move(player, row, col, utility, self.currentGameState, 0))
         if player == 2:
-            self.oppMoves.append(Move(player, row, col, utility, self.boardConfiguration))
+            self.savedMovesOpp.append(Move(player, row, col, utility, self.currentGameState, 0))
 
 class Move: #class representing a move made by either player
     player: int #the player that made the move
     row: int #the row the piece was placed in
     col: int #the column the piece was placed in
     utility: float #the utility represented by the move
-    board : BoardConfiguration #the board configuration after the move has been made
+    moveXBoardConfig : BoardConfiguration #the board configuration after the move has been made
+    moveNum: int #the move number in the game
 
-    def __init__(self, player, row, col, utility, board):
+    def __init__(self, player, row, col, utility, board, moveNum):
         self.player = player
         self.row = row
         self.col = col
         self.utility = utility
-        self.board = board
+        self.moveXBoardConfig = board
+        self.moveNum = moveNum
