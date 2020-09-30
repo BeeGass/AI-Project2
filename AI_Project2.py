@@ -32,7 +32,9 @@ def PlayGame(board):
             board.placePiece(row, col, 0, 2, moveNum) #makes opponent move
             moveNum += 1
         #make move here
+        print("Turn "+str(moveNum)+" completed.")
         moveNum += 1
+        input("Press any key to continue . . .")
         PlayGame(board) #repeats until game completion
 
 #Evaluation function that returns the utility value of a given board configuration
