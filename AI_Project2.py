@@ -34,6 +34,17 @@ def PlayGame(board):
         moveNum += 1
         PlayGame(board) #repeats until game completion
 
+#Evaluation function that returns the utility value of a given board configuration
+#boardConfig: BoardConfiguration, the board config to evaluate
+#player: int, the player to evaluate the utility for
+def BoardEval(boardConfig, player):
+    #ints representing weights for possible stone configurations
+    fiveWeight, liveFourWeight, deadFourWeight, liveThreeWeight, deadThree, liveTwo, deadTwo: int
+    #ints representing the counts for each configuration
+    fiveCnt, liveFourCnt, deadFourCnt, liveThreeCnt, deadThreeCnt, liveTwoCnt, deadTwoCnt: int
+    #-------------------------
+
+
 #------------------------------------------------------------------
 ##Calcultes the utility for home team agent 
 def CalculateSelfUtility(inputCol, inputRow):
