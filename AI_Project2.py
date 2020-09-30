@@ -36,7 +36,8 @@ def PlayGame(board):
 
 #------------------------------------------------------------------
 ##Calcultes the utility for home team agent 
-def CalculateSelfUtility():
+def CalculateSelfUtility(inputCol, inputRow):
+    AttackValue(i, j) ∗ (AttackFactor + 16)/16 + DefenseValue(i, j) + randomfunction
 
     return 1
 
@@ -87,7 +88,7 @@ def AlphaBetaPruning(inputPosition, inputDepth, inputAlpha, inputBeta, inputMaxi
             eval = Minimax(child, inputDepth - 1, inputAlpha, inputBeta, true)
             minEval = min(minEval, eval) 
 
-            beta = max(beta, eval)
+            beta = min(beta, eval)
             if beta <= alpha:
                 break
             return minEval
