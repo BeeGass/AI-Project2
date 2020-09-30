@@ -34,9 +34,26 @@ def PlayGame(board):
         PlayGame(board) #repeats until game completion
 
 #------------------------------------------------------------------
+def CalculateBoardValue():
+
+    for i in Board.currentGameState.boardList:
+
+
 ##Calcultes the utility for home team agent 
 def CalculateSelfUtility(inputCol, inputRow):
-    AttackValue(i, j) ∗ (AttackFactor + 16)/16 + DefenseValue(i, j) + randomfunction
+    CalculateBoardValue() 
+
+    """
+    w1 × the number of five-in-row
+    w2 × the number of live-fours
+    w3 × the number of dead-fours
+    w4 × the number of live-threes
+    w5 × the number of dead-threes
+    w6 × the number of live-twos
+    w7 × the number of dead-twos
+    w8 x the number of live-ones
+    w9 x the number of dead-ones
+    """
 
     return 1
 
