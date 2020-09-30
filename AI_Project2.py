@@ -35,9 +35,125 @@ def PlayGame(board):
         PlayGame(board) #repeats until game completion
 
 #------------------------------------------------------------------
-def CalculateBoardValue():
+def getDistance(x2, x1, y2, y1):
+    dist = math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2))
 
-    for i in Board.currentGameState.boardList:
+    return dist
+
+def PerformSpiral(inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
+    X = inputBoardDimensionX
+    Y = inputBoardDimensionY
+    turn = inputPlayerTurn
+
+    NumOfFives = 0 # the number of five-in-row
+    NumOfFours = 0 # the number of fours
+    NumOfThrees = 0 # the number of threes
+    NumOfTwos = 0 # the number of twos
+    NumOfOnes = 0 # the number of ones
+
+
+    x = 0
+    y = 0
+    dx = 0
+    dy = -1
+
+    stoneArrForOpp = []
+    stoneCounterForOpp = 0
+
+    stoneArrForSelf = []
+    stoneCounterForSelf = 0
+
+    for i in range(max(X, Y)**2):
+        if (int(-X/2) < x <= int(X/2)) and (int(-Y/2) < y <= int(Y/2)):
+            location = []
+            location.append(x)
+            location.append(y)
+
+            spot = Board.currentGameState.boardList[x][y]
+
+            if spot == 1:
+                if not stoneArrForSelf:
+                    stoneArrForSelf = location
+                elif stoneArrForSelf:
+                    dist = getDistance(stoneArrForSelf[0], location[0], stoneArrForSelf[1], location[1])
+
+                    if dist < 2:
+                        stoneCounterForSelf = stoneCounterForSelf + 1
+                        stoneArrForSelf = []
+                        stoneArrForSelf = location
+                    elif dist > 1:
+                        if stoneCounterForSelf == 1:
+                            NumOfOnes = NumOfOnes + 1
+
+                        elif stoneCounterForSelf == 2:
+                            NumOfTwos = NumOfTwos + 1
+
+                        elif stoneCounterForSelf == 3:
+                            NumOfThrees = NumOfThrees + 1
+
+                        elif stoneCounterForSelf == 4:
+                            NumOfFours = NumOfFours + 1
+
+                        elif stoneCounterForSelf == 5:
+                            NumOfFives = NumOfFives + 1
+
+                        else:
+                            print("error in the distance portion of PerformSpiral()")
+
+                        stoneCounterForSelf = 0 
+                        stoneArrForSelf = []
+
+            elif spot == 2:
+                if not stoneArrForSelf:
+                    stoneArrForSelf = location
+                elif stoneArrForSelf:
+                    dist = getDistance(stoneArrForSelf[0], location[0], stoneArrForSelf[1], location[1])
+
+                    if dist < 2:
+                        stoneCounterForSelf = stoneCounterForSelf + 1
+                        stoneArrForSelf = []
+                        stoneArrForSelf = location
+                    elif dist > 1:
+                        if stoneCounterForSelf == 1:
+                            NumOfOnes = NumOfOnes + 1
+
+                        elif stoneCounterForSelf == 2:
+                            NumOfTwos = NumOfTwos + 1
+
+                        elif stoneCounterForSelf == 3:
+                            NumOfThrees = NumOfThrees + 1
+
+                        elif stoneCounterForSelf == 4:
+                            NumOfFours = NumOfFours + 1
+
+                        elif stoneCounterForSelf == 5:
+                            NumOfFives = NumOfFives + 1
+
+                        else:
+                            print("error in the distance portion of PerformSpiral()")
+
+                        stoneCounterForSelf = 0 
+                        stoneArrForSelf = []
+
+        if x == y or (x < 0 and x == -y) or (x > 0 and x == 1-y):
+            dx = -dy 
+            dy = dx
+        x = x+dx 
+        y = y+dy
+
+def CalculateBoardValue():
+    widthOfBoard = 15
+    heightOfBoard = 15
+
+    for i in 1:
+        if i == 0:
+            PerformSpiral(widthOfBoard, heightOfBoard, i)
+        elif i == 1: 
+            PerformSpiral(widthOfBoard, heightOfBoard, i)
+        else: 
+            print("error in CalculateBoardValue()")
+
+
 
 
 ##Calcultes the utility for home team agent 
