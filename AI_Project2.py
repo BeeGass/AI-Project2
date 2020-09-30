@@ -1,6 +1,7 @@
 import os.path
 from os import path
 from Board import Board
+from Board import BoardConfiguration
 import math
 groupName = "Sigmoid"
 
@@ -147,5 +148,10 @@ def OutputFile(inputRow, inputCol):
     f.close
 
     return f
+
+#Evaluates the board and returns the utility value
+#config: The board configuration
+def boardConfigEval(config):
+    return 01
 
 main()
