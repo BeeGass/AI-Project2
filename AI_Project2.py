@@ -164,6 +164,11 @@ def AlphaBetaPruning(inputPosition, inputDepth, inputAlpha, inputBeta, inputMaxi
                 break
             return minEval
 
+#Gets the two children of an input position
+#inputPosition: The BoardConfiguration to generate moves from
+def getChildren(inputPosition):
+
+
 #------------------------------------------------------------------
 #Heuristics that limit the depth to which the game tree is expanded
 
