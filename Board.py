@@ -39,3 +39,12 @@ class Move: #class representing a move made by either player
         self.utility = utility
         self.moveXBoardConfig = board
         self.moveNum = moveNum
+
+#Class representing a direction
+class Dir:
+    h: int #horizontal offset
+    v: int #vertical offset
+
+    def __init__(self, h, v):
+        self.h = h
+        self.v = v

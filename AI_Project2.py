@@ -2,6 +2,7 @@ import os.path
 from os import path
 from Board import Board
 from Board import BoardConfiguration
+from Board import Dir
 import math
 groupName = "Sigmoid"
 
@@ -31,8 +32,61 @@ def PlayGame(board):
             board.placePiece(row, col, 0, 2, moveNum) #makes opponent move
             moveNum += 1
         #make move here
+        print("Turn "+str(moveNum)+" completed.")
         moveNum += 1
+        input("Press any key to continue . . .")
         PlayGame(board) #repeats until game completion
+
+#Evaluation function that returns the utility value of a given board configuration
+#boardConfig: BoardConfiguration, the board config to evaluate
+#player: int, the player to evaluate the utility for
+def BoardEval(boardConfig, player):
+    #ints representing weights for possible stone configurations
+    #fiveWeight, liveFourWeight, deadFourWeight, liveThreeWeight, deadThree, liveTwo, deadTwo: int
+    #ints representing the counts for each configuration
+    fiveCnt, liveFourCnt, deadFourCnt, liveThreeCnt, deadThreeCnt, liveTwoCnt, deadTwoCnt = 0
+    eval = 0 #the return value for the function
+    #-------------------------
+    #scenario for finding a direction of movement
+    r = 0
+    c = 0
+    movementDir = Dir(0,0) #dummy direction for implementation's sake
+    successiveCount = 0 #count of successive stones for current player
+    totalCount = 0 #count of the total number of stones for current player in the direction the search is looking
+    block = False #bool representing if there is a piece blocking on any side
+    gap = False #bool representing if there is a gap
+    currentPos = Dir(r, c) #represents the current position
+    while currentPos.h < len(boardConfig) and currentPos.v < len(boardConfig[0]): #makes sure the coords are within the bounds of the board
+        if boardConfig[r+movementDir.h][c+movementDir.v] == player:
+            totalCount += 1 #add to the running total for the current direction
+            if not gap: successiveCount += 1 #if no gap, add to successive count
+        elif boardConfig[r+movementDir.h][c+movementDir.v] != 0: #check to see if it is enemy piece
+            if not block:
+                block = True
+            else:
+                break #break out of the for loop once >1 block has been found
+        else: #no piece present
+            if not gap:
+                gap = True
+                successiveCount = 0
+            else:
+                break #break out of the for loop if >1 gap is found
+
+    if totalCount == 5: fiveCnt += 1
+    if totalCount == 4:
+        if block: deadFourCnt += 1 #if the move is blocked on one side, it is dead
+        else: liveFourCnt += 1 #if it is not blocked, it is live
+    if totalCount == 3:
+        if block: deadThreeCnt += 1
+        else: liveThreeCnt
+    if totalCount == 2:
+        if block: deadTwoCnt += 1
+        else: liveTwoCnt += 1
+    
+    #------------------------------------
+
+    if player == 1:
+        eval -= BoardEval(boardConfig, 2) #subtract the opponent's eval score
 
 #------------------------------------------------------------------
 def getDistance(x2, x1, y2, y1):
@@ -156,7 +210,7 @@ def CalculateBoardValue():
 
 
 
-##Calcultes the utility for home team agent 
+##Calcultes the utility for home team agent
 def CalculateSelfUtility(inputCol, inputRow):
     CalculateBoardValue() 
 
@@ -286,6 +340,6 @@ def OutputFile(inputRow, inputCol):
 #Evaluates the board and returns the utility value
 #config: The board configuration
 def boardConfigEval(config):
-    return 01
+    return 1
 
 main()
