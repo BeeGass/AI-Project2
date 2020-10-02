@@ -41,10 +41,10 @@ class Move: #class representing a move made by either player
         self.moveNum = moveNum
 
 #Class representing a direction
-class Dir:
-    h: int #horizontal offset
-    v: int #vertical offset
+class Vector:
+    x: int #x coordinate 
+    y: int #y coordinate
 
-    def __init__(self, h, v):
-        self.h = h
-        self.v = v
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y

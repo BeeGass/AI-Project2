@@ -2,7 +2,9 @@ import os.path
 from os import path
 from Board import Board
 from Board import BoardConfiguration
-from Board import Dir
+from Board import Vector
+from Board import Move
+
 import math
 groupName = "Sigmoid"
 
@@ -93,6 +95,33 @@ def getDistance(x2, x1, y2, y1):
     dist = math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2))
 
     return dist
+
+def getVector(x2, x1, y2, y1):
+    xCoord = x2 - x1
+    yCoord = y2 - y1
+    orderedPair = Vector(x = xCoord, y = yCoord)
+
+    return orderedPair
+#------------------------------------------------------------------
+
+def isAdjacentCell():
+    dist = getDistance()
+
+    if dist > 1: 
+        #DO SOME SHIT
+        print()
+    elif dist == 1:
+        #DO SOME SHIT
+        print()
+    elif dist == 0:
+        #YOU GOT A PROBLEM BECAUSE THE DISTANCE SHOULDNT BE 0
+        print("Error: distance shouldnt be 0")
+    else: 
+        print("Error: issue in the isAdjacentCell() function")
+
+def CalculateBoardState():
+
+    return 1
 
 def PerformSpiral(inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
     X = inputBoardDimensionX
@@ -276,18 +305,12 @@ def AlphaBetaPruning(inputPosition, inputDepth, inputAlpha, inputBeta, inputMaxi
             minEval = min(minEval, eval) 
 
             beta = min(beta, eval)
-            if beta <= alpha:
+            if beta <= alpha: 
                 break
             return minEval
 
-#Gets the two children of an input position
-#inputPosition: The BoardConfiguration to generate moves from
-def getChildren(inputPosition):
-
-
 #------------------------------------------------------------------
 #Heuristics that limit the depth to which the game tree is expanded
-
 def CuttingOffSearch():
     return 1
 
