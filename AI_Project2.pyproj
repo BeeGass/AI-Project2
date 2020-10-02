@@ -23,6 +23,7 @@
   <ItemGroup>
     <Compile Include="AI_Project2.py" />
     <Compile Include="Board.py" />
+    <Compile Include="ConfigsEnum.py" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Description.txt" />

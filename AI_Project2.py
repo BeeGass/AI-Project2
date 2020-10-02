@@ -3,6 +3,7 @@ from os import path
 from Board import Board
 from Board import BoardConfiguration
 from Board import Vector
+import ConfigsEnum
 import math
 groupName = "Sigmoid"
 
@@ -10,11 +11,20 @@ moveNum = 0 #The move number in the game
 
 def main():
     board = Board()
+    
     result = PlayGame(board) #0 for tie, 1 for AI player wins, 2 for opposing player wins
 
 #Function which will play the Gomoku game until completion
 #board: An array represetnation of the game board
 def PlayGame(board):
+    #-------------------------------
+    board.currentGameState.boardList[5][5] = 1;
+    board.currentGameState.boardList[4][5] = 1;
+    #Expected value from calcPathUtil: 5
+    print("Result: " + str(calcPathUtil(board.currentGameState.boardList, Vector(4,5), Vector(1,0), 1)))
+    input("suh")
+    #------------------------------
+
     global moveNum
     #while not path.exists(groupName+".go"): #waits until it is the player's move
     #   pass
@@ -199,17 +209,17 @@ def PerformSpiral(inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
         y = y+dy
 
 #Calculates the utility value for a given path
-def calcPathUtil (boardState, startPos, dir):
+def calcPathUtil (boardState, startPos, dir, player):
     currentPos = Vector(startPos.x + dir.x, startPos.y + dir.y); #represents the current position in the search
     pathLength = 1 #represents the length of the path
     block = 0 #0 if path is not obstructed on either side, 1 if obstructed on 1 side, 2 if obstructed on both sides
     gap = False #bool representing if there is a gap
 
     #search in the positive direction
-    while currentPos.x < len(boardConfig) and currentPos.y < len(boardConfig[0] and pathLength < 5): #makes sure the coords are within the bounds of the board
-        if boardConfig[currentPos.x][currentPos.y] == player:
+    while currentPos.x < len(boardState) and currentPos.y < len(boardState[0]) and pathLength < 5: #makes sure the coords are within the bounds of the board
+        if boardState[currentPos.x][currentPos.y] == player:
             pathLength += 1 #add to the running total for the current direction
-        elif boardConfig[currentPos.x][currentPos.y] != 0: #check to see if it is enemy piece
+        elif boardState[currentPos.x][currentPos.y] != 0: #check to see if it is enemy piece
             block += 1
             break;
         else: #no piece present
@@ -222,13 +232,13 @@ def calcPathUtil (boardState, startPos, dir):
 
         #todo implement turns
 
-    currentPos = Dir(startPos.x - dir.x, startPos.y - dir.y); #begin search in other direction
+    currentPos = Vector(startPos.x - dir.x, startPos.y - dir.y); #begin search in other direction
 
     #search in the positive direction
     while currentPos.x > 0 and currentPos.y > 0 and pathLength < 5: #makes sure the coords are within the bounds of the board
-        if boardConfig[currentPos.x][currentPos.y] == player:
+        if boardState[currentPos.x][currentPos.y] == player:
             pathLength += 1 #add to the running total for the current direction
-        elif boardConfig[currentPos.x][currentPos.y] != 0: #check to see if it is enemy piece
+        elif boardState[currentPos.x][currentPos.y] != 0: #check to see if it is enemy piece
             block += 1
             break;
         else: #no piece present
@@ -239,8 +249,12 @@ def calcPathUtil (boardState, startPos, dir):
         currentPos.x -= 1;
         currentPos.y -= 1;
 
+    if pathLength == 5:
+       return ConfigsEnum.ConfigsEnum.FIVE;
     if block == 2 and not gap: #if the path is obstructed on both sides and there is no gap in the middle, the position is worth nothing
         return 0
+    if pathLength == 2:
+        return ConfigsEnum.ConfigsEnum.LIVETWO
 
     return 0
 
@@ -332,7 +346,7 @@ def AlphaBetaPruning(inputPosition, inputDepth, inputAlpha, inputBeta, inputMaxi
 #Gets the two children of an input position
 #inputPosition: The BoardConfiguration to generate moves from
 def getChildren(inputPosition):
-
+    return None
 
 #------------------------------------------------------------------
 #Heuristics that limit the depth to which the game tree is expanded
