@@ -2,7 +2,7 @@ import os.path
 from os import path
 from Board import Board
 from Board import BoardConfiguration
-from Board import Dir
+from Board import Vector
 import math
 groupName = "Sigmoid"
 
@@ -50,13 +50,14 @@ def BoardEval(boardConfig, player):
     #scenario for finding a direction of movement
     r = 0
     c = 0
-    movementDir = Dir(0,0) #dummy direction for implementation's sake
+    movementDir = Dir(1,1) #dummy direction for implementation's sake
     successiveCount = 0 #count of successive stones for current player
     totalCount = 0 #count of the total number of stones for current player in the direction the search is looking
     block = False #bool representing if there is a piece blocking on any side
     gap = False #bool representing if there is a gap
     currentPos = Dir(r, c) #represents the current position
     while currentPos.h < len(boardConfig) and currentPos.v < len(boardConfig[0]): #makes sure the coords are within the bounds of the board
+        #todo stop at count > 5, increment current position
         if boardConfig[r+movementDir.h][c+movementDir.v] == player:
             totalCount += 1 #add to the running total for the current direction
             if not gap: successiveCount += 1 #if no gap, add to successive count
@@ -78,7 +79,7 @@ def BoardEval(boardConfig, player):
         else: liveFourCnt += 1 #if it is not blocked, it is live
     if totalCount == 3:
         if block: deadThreeCnt += 1
-        else: liveThreeCnt
+        else: liveThreeCnt += 1
     if totalCount == 2:
         if block: deadTwoCnt += 1
         else: liveTwoCnt += 1
@@ -194,6 +195,52 @@ def PerformSpiral(inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
             dy = dx
         x = x+dx 
         y = y+dy
+
+#Calculates the utility value for a given path
+def calcPathUtil (boardState, startPos, dir):
+    currentPos = Vector(startPos.x + dir.x, startPos.y + dir.y); #represents the current position in the search
+    pathLength = 1 #represents the length of the path
+    block = 0 #0 if path is not obstructed on either side, 1 if obstructed on 1 side, 2 if obstructed on both sides
+    gap = False #bool representing if there is a gap
+
+    #search in the positive direction
+    while currentPos.x < len(boardConfig) and currentPos.y < len(boardConfig[0] and pathLength < 5): #makes sure the coords are within the bounds of the board
+        if boardConfig[currentPos.x][currentPos.y] == player:
+            pathLength += 1 #add to the running total for the current direction
+        elif boardConfig[currentPos.x][currentPos.y] != 0: #check to see if it is enemy piece
+            block += 1
+            break;
+        else: #no piece present
+            if not gap:
+                gap = True
+            else:
+                break #break out of the for loop if >1 gap is found
+        currentPos.x += 1;
+        currentPos.y += 1;
+
+        #todo implement turns
+
+    currentPos = Dir(startPos.x - dir.x, startPos.y - dir.y); #begin search in other direction
+
+    #search in the positive direction
+    while currentPos.x > 0 and currentPos.y > 0 and pathLength < 5: #makes sure the coords are within the bounds of the board
+        if boardConfig[currentPos.x][currentPos.y] == player:
+            pathLength += 1 #add to the running total for the current direction
+        elif boardConfig[currentPos.x][currentPos.y] != 0: #check to see if it is enemy piece
+            block += 1
+            break;
+        else: #no piece present
+            if not gap:
+                gap = True
+            else:
+                break #break out of the for loop if >1 gap is found
+        currentPos.x -= 1;
+        currentPos.y -= 1;
+
+    if block == 2 and not gap: #if the path is obstructed on both sides and there is no gap in the middle, the position is worth nothing
+        return 0
+
+    return 0
 
 def CalculateBoardValue():
     widthOfBoard = 15
