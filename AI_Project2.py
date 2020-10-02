@@ -78,18 +78,20 @@ def BoardEval(boardConfig, player):
             else:
                 break #break out of the for loop if >1 gap is found
 
-    if totalCount == 5: fiveCnt += 1
+    if totalCount == 5: 
+        fiveCnt += 1
+
     if totalCount == 4:
         if block: deadFourCnt += 1 #if the move is blocked on one side, it is dead
         else: liveFourCnt += 1 #if it is not blocked, it is live
+
     if totalCount == 3:
         if block: deadThreeCnt += 1
         else: liveThreeCnt += 1
+
     if totalCount == 2:
         if block: deadTwoCnt += 1
         else: liveTwoCnt += 1
-    
-    #------------------------------------
 
     if player == 1:
         eval -= BoardEval(boardConfig, 2) #subtract the opponent's eval score
