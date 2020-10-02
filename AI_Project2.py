@@ -17,14 +17,6 @@ def main():
 #Function which will play the Gomoku game until completion
 #board: An array represetnation of the game board
 def PlayGame(board):
-    #-------------------------------
-    board.currentGameState.boardList[5][5] = 1;
-    board.currentGameState.boardList[4][5] = 1;
-    #Expected value from calcPathUtil: 5
-    print("Result: " + str(calcPathUtil(board.currentGameState.boardList, Vector(4,5), Vector(1,0), 1)))
-    input("suh")
-    #------------------------------
-
     global moveNum
     #while not path.exists(groupName+".go"): #waits until it is the player's move
     #   pass
@@ -42,6 +34,9 @@ def PlayGame(board):
             board.placePiece(row, col, 0, 2, moveNum) #makes opponent move
             moveNum += 1
         #make move here
+        board.currentGameState.boardList[0][0] = 1
+        board.currentGameState.boardList[1][1] = 1
+        print(str(PerformSpiral(board, 15, 15, 1)))
         print("Turn "+str(moveNum)+" completed.")
         moveNum += 1
         input("Press any key to continue . . .")
@@ -105,10 +100,12 @@ def getDistance(x2, x1, y2, y1):
 
     return dist
 
-def PerformSpiral(inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
+def PerformSpiral(boardConfig, inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
     X = inputBoardDimensionX
     Y = inputBoardDimensionY
     turn = inputPlayerTurn
+
+    totalUtil = 0 #the utility value to return
 
     NumOfFives = 0 # the number of five-in-row
     NumOfFours = 0 # the number of fours
@@ -121,6 +118,8 @@ def PerformSpiral(inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
     y = 0
     dx = 0
     dy = -1
+    adjX = 0
+    adjY = 0
 
     stoneArrForOpp = []
     stoneCounterForOpp = 0
@@ -131,12 +130,17 @@ def PerformSpiral(inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
     for i in range(max(X, Y)**2):
         if (int(-X/2) < x <= int(X/2)) and (int(-Y/2) < y <= int(Y/2)):
             location = []
-            location.append(x)
-            location.append(y)
+            adjX = x+7
+            adjY = y+7
+            location.append(adjX)
+            location.append(adjY)
 
-            spot = Board.currentGameState.boardList[x][y]
+            print("X: "+str(adjX)+", Y: "+str(adjY))
+
+            spot = boardConfig.currentGameState.boardList[x][y]
 
             if spot == 1:
+
                 if not stoneArrForSelf:
                     stoneArrForSelf = location
                 elif stoneArrForSelf:
@@ -144,6 +148,8 @@ def PerformSpiral(inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
 
                     if dist < 2:
                         stoneCounterForSelf = stoneCounterForSelf + 1
+                        totalUtil += calcPathUtil(boardConfig.currentGameState.boardList, Vector(stoneArrForSelf[0], stoneArrForSelf[1]), getVector(location[0], stoneArrForSelf[0], location[1], stoneArrForSelf[1]), turn)
+                        print(totalUtil)
                         stoneArrForSelf = []
                         stoneArrForSelf = location
                     elif dist > 1:
@@ -201,10 +207,10 @@ def PerformSpiral(inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
                         stoneArrForSelf = []
 
         if x == y or (x < 0 and x == -y) or (x > 0 and x == 1-y):
-            dx = -dy 
-            dy = dx
-        x = x+dx 
-        y = y+dy
+            dx, dy = -dy, dx
+        x, y = x+dx, y+dy
+
+    return totalUtil
 
 #Calculates the utility value for a given path
 def calcPathUtil (boardState, startPos, dir, player):
@@ -248,11 +254,11 @@ def calcPathUtil (boardState, startPos, dir, player):
         currentPos.y -= 1;
 
     if pathLength == 5:
-       return ConfigsEnum.ConfigsEnum.FIVE;
+       return 10
     if block == 2 and not gap: #if the path is obstructed on both sides and there is no gap in the middle, the position is worth nothing
         return 0
     if pathLength == 2:
-        return ConfigsEnum.ConfigsEnum.LIVETWO
+        return 5
 
     return 0
 
@@ -407,5 +413,12 @@ def OutputFile(inputRow, inputCol):
 #config: The board configuration
 def boardConfigEval(config):
     return 1
+
+def getVector(x2, x1, y2, y1):
+    xCoord = x2 - x1
+    yCoord = y2 - y1
+    orderedPair = Vector(x = xCoord, y = yCoord)
+
+    return orderedPair
 
 main()
