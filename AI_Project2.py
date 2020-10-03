@@ -214,6 +214,12 @@ def PerformSpiral(boardConfig, inputBoardDimensionX, inputBoardDimensionY, input
 
     return totalUtil
 
+def MakeStartingNode(inputStartingMove):
+    theMove = inputStartingMove
+    firstNode = MiniMaxNode(parent = None, children = None, currentVal = theMove.utility, currentMove = theMove)
+
+    return firstNode 
+
 #Calculates the utility value for a given path
 def calcPathUtil (boardState, startPos, dir, player):
     currentPos = Vector(startPos.x + dir.x, startPos.y + dir.y); #represents the current position in the search

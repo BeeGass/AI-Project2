@@ -48,3 +48,18 @@ class Vector:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+
+
+class MiniMaxNode:
+    parent: MiniMaxNode #collection of arbitrary moves to current aribitrary point 
+    children: list #collection of arbitrary moves representing arbitrary amount of children 
+    currentVal: Move #the metric for utility 
+    currentMove: Move #the move so as to reference the board state later on
+    evalForNextMove: int 
+
+    def __init__(self, parent, children, currentVal):
+        self.parent = parent
+        self.children = children
+        self.currentVal = currentVal
+        self.currentMove = currentMove
+        self.evalForNextMove = evalForNextMove
