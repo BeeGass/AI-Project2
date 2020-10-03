@@ -17,13 +17,18 @@ class Board:
     #row: The row
     #col: The column
     #Player: 1 if AI player, 2 if opponent
+    #Returns true if move was successful, false otherwise
     def placePiece(self, row, col, utility, player, moveNum):
+        if self.currentGameState.boardList[row][col] != 0 and moveNum != 1: #if the spot on the board is taken and it is not the second
+            #move of the game (where placing a piece over another is a legal move)
+            return False
         self.currentGameState.boardList[row][col] = player
         if player == 1:
             self.savedMovesSelf.append(Move(player, row, col, utility, self.currentGameState, 0))
         if player == 2:
             self.savedMovesOpp.append(Move(player, row, col, utility, self.currentGameState, 0))
-
+        return True
+s
 class Move: #class representing a move made by either player
     player: int #the player that made the move
     row: int #the row the piece was placed in
