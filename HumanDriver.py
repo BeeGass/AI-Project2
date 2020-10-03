@@ -32,7 +32,7 @@ def PlayGame(board):
 #board: The current game state
 def getInput(board):
     global moveNum
-    val = getInput("Enter a row and column to place a stone (i.e. A 6)")
+    val = input("Enter a row and column to place a stone (i.e. A 6)")
     vals = val.split()
     row = LetterToNumber(vals[0])
     col = int(vals[1])
