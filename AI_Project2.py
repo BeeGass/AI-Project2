@@ -15,7 +15,7 @@ def PlayGame(board):
     global moveNum
     #while not path.exists(groupName+".go"): #waits until it is the player's move
     #   pass
-    if path.exists(paths.goFile)
+    if path.exists(paths.goFile):
         if path.exists(paths.endgame):
             #end of game
             print("End of game")
@@ -191,6 +191,146 @@ def MakeStartingNode(inputStartingMove):
 
     return firstNode
 
+def CreateTree(inputStartingMove, depthLimit):
+    rootNode = firstNode = MiniMaxNode(parent = None, children = None, currentVal = inputStartingMove.utility, currentMove = inputStartingNode)
+    rootNode.children = CreateChildren(rootNode.currentMove, depthLimit, 0)
+
+def CreateChildren(prevMove, depthLimit, currentDepth):
+    children = [] 
+    currentTurn = currentDepth % 2 + 1
+    childMoves = genPossibleMoves(prevMove, currentDepth % 2 + 1)
+
+    if (currentDepth >= depthLimit):
+        lastChild = []
+        return lastChild
+
+    currentDepth += 1
+    for move in childMoves:
+        children.append(MiniMaxNode(parent  = prevMove, children = CreateChildren(move, depthLimit, currentDepth), currentVal = -1, currentMove = move, evalForNextMove = -1))
+
+    return children
+
+
+##spiral() will perform a spiraling search from the point that was found at (inputXPlaceOnBoard, inputYPlaceOnBoard). 
+#The search will search up 2 cells away from the center point and will stop if it finds nothing
+#in the event it does find an empty place to potentially put a stone it will add it to the ListOfPreviousPossibleMoves to avoid any potential duplicated moves
+#     0   1   2   3   4   5   6   7   8   9  10  11  12  13  14
+#   +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+# 0 |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+#   +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+# 1 |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+#   +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+# 2 |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+#   +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+# 3 |   |   |   | X |   |   |   |   |   |   |   |   |   |   |   |
+#   +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+                            -2  -1   0   1   2
+# 4 |   |   |   |   | O | X |   |   |   | O |   |   |   |   |   |                           +---+---+---+---+---+
+#   +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+                       -2  |   |   |   |   |   |
+# 5 |   |   |   |   | X | O |   |   | X |   |   |   |   |   |   |                           +---+---+---+---+---+
+#   +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+                 \     -1  |   | X |   |   |   |
+# 6 |   |   |   |   |   |   | O | X |   |   |   |   |   |   |   |     -------------\        +---+---+---+---+---+
+#   +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+                   >    0  |   |   | O | X |   |
+# 7 |   |   |   |   |   |   | O | X |   |   |   |   |   |   |   |     -------------/        +---+---+---+---+---+
+#   +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+                 /      1  |   |   | X | O |   |
+# 8 |   |   |   |   |   |   | O | X |   |   |   |   |   |   |   |                           +---+---+---+---+---+
+#   +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+                        2  |   |   |   |   | O |
+# 9 |   |   |   |   |   |   | X | O |   |   |   |   |   |   |   |                           +---+---+---+---+---+
+#   +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+                     
+#10 |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |                            -2  -1   0   1   2
+#   +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+                           +---+---+---+---+---+
+#11 |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |                       -2  |END|10→|11→|12→|13↓|
+#   +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+                           +---+---+---+---+---+
+#12 |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |                 \     -1  |24↑| 9↑| 2→| 3↓|14↓|
+#   +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+     -------------\        +---+---+---+---+---+
+#13 |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |                   >    0  |23↑| 8↑| 1↑| 4↓|15↓|
+#   +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+     -------------/        +---+---+---+---+---+
+#14 |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |                 /      1  |22↑| 7↑| 6←| 5←|16↓|
+#   +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+                           +---+---+---+---+---+
+#                                                                                        2  |21↑|20←|19←|18←|17←|
+#                                                                                           +---+---+---+---+---+
+def spiral(X, Y, listOfPreviousMoves, inputXBoard, inputXPlaceOnBoard, inputYPlaceOnBoard):
+
+    # trueX and trueY are the x and y values associated with the real game board
+    #this is because it can be thought of that spiral() analyzes a the game board a zoomed in manner
+    #treating the inputXPlaceOnBoard, inputYPlaceOnBoard as the center and only viewing 2 cells around it in each axis
+    trueX = inputXPlaceOnBoard
+    trueY = inputYPlaceOnBoard
+
+    #these are to initialize values associated with performing the spiral function 
+    x = 0
+    y = 0
+    dx = 0
+    dy = -1
+
+    #List of all possible moves around the piece in question 
+    ListOfPreviousPossibleMoves = []
+
+    for i in range(max(X, Y)**2):
+        vecX = x 
+        vecY = y
+
+        # adjusts the spiral board so that the center of the spiral board is in the correct coordinate system as the board where the piece lies on. 
+        #this means that we need to adjust the coordinates and the range the coordinates can fall under aswell
+        NegativeXLimit = int((-X/2) + (trueX - 1))
+        PositiveXLimit = int((X/2) + (trueX - 1))
+
+        NegativeYLimit = int((-Y/2) + (trueY - 1))
+        PositiveYLimit = int((Y/2) + (trueY - 1))
+
+        #adjusts the coordinates aswell 
+        adjustedX = int(trueX + x)
+        adjustedY = int(trueY - y)
+
+        if (NegativeXLimit < adjustedX <= PositiveXLimit) and (NegativeYLimit < adjustedY <= PositiveYLimit):
+            theSpot = inputXBoard.boardList[trueX + vecX][trueY - vecY] #the true dimension inputted to find the value of the board at that cell
+
+            if theSpot != 1 and theSpot != 2 and theSpot not in ListOfPreviousPossibleMoves: #if the spot is equal to an open space then add that to possible moves, if not move on to next potential cell
+                ListOfPreviousPossibleMoves.append(Vector(x = adjustedX, y = adjustedY)) #add the vector to the list 
+
+            else: 
+                pass
+
+        if adjustedX == adjustedY or (adjustedX < 0 and adjustedX == -adjustedY) or (adjustedX > 0 and adjustedX == 1-adjustedY):
+            dx, dy = -dy, dx
+        x, y = x+dx, y+dy
+
+    return ListOfPreviousPossibleMoves
+
+
+## genPossibleMoves will iterate through an entire board and find all possible moves that are within 2 spaces of any given piece
+def genPossibleMoves(inputMove, player):
+
+    inputMove.moveXBoardConfig = inputXBoard
+    theNumber = inputMove.moveNum + 1
+
+    #this two define the search space of a given piece should be within 2 blocks of it 
+    widthOfSearch = 4
+    lengthOfSearch = 4
+
+    #Creation of the list that will hold all possible moves on the current board
+    ListOfAllPossibleMoves = []
+
+    for i,j in range(len(inputXBoard.boardList[i][j])): #iterate through the board
+        #xPlaceOnBoard and yPlaceOnBoard will be referenced within spiral() 
+        xPlaceOnBoard = i
+        yPlaceOnBoard = j
+
+        #get current value at cell (i, j)
+        theSpot = inputXBoard.boardList[i][j]
+
+        if theSpot == 1 or theSpot == 2: #if the cell is either a "1" or "2" player search for a possible move
+            ListOfMovesForPiece = spiral(widthOfSearch, lengthOfSearch, inputXBoard, xPlaceOnBoard, yPlaceOnBoard) #returns a list of possible moves given the piece found at (i, j)
+
+            for move in ListOfMovesForPiece: #if the move from list of moves found at (i, j) is not within the total list of all possible moves, given the boardstate inputted, add to the list
+                if not move in ListOfAllPossibleMoves:
+                    ListOfAllPossibleMoves.append(Move(player, row = move.x, col = move.y, utility = -1, board = inputXBoard.boardList.append(move), moveNum = theNumber))
+
+    if ListOfAllPossibleMoves == []: #if the list is empty then no moves have been made and we need to perform the first move
+        PerformFirstMove() #TODO: implement this function 
+
+    return ListOfAllPossibleMoves #returns all possible moves
+
+
 #Calculates the utility value for a given path
 def calcPathUtil (boardState, startPos, dir, player):
     currentPos = Vector(startPos.x + dir.x, startPos.y + dir.y); #represents the current position in the search
@@ -253,6 +393,10 @@ def CalculateBoardValue():
         else:
             print("error in CalculateBoardValue()")
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0dbf48f1cfd823d4b59687e0a0ca2bc4a7d63aa9
 ##Calcultes the utility for home team agent
 def CalculateSelfUtility(inputCol, inputRow):
     CalculateBoardValue()
@@ -278,7 +422,6 @@ def CalculateOpposingUtility():
 
 #TODO add list of moves
 def MiniMax(inputPosition, inputDepth, inputMaximizingPlayer):
-
     #if the input depth is met or the game is over out put the evaluation of how good the move last made was
     if inputDepth == 0 or gameOver:
         positionEval = CalculateSelfUtility()
@@ -377,11 +520,8 @@ def OutputFile(inputRow, inputCol):
 
     return f
 
-#Evaluates the board and returns the utility value
-#config: The board configuration
-def boardConfigEval(config):
-    return 1
-
+##getVector will take in two different points and find the vector associated with the two to create a 
+#sense of direction to search for a potential continuation of connected stones
 def getVector(x2, x1, y2, y1):
     xCoord = x2 - x1
     yCoord = y2 - y1
@@ -389,6 +529,9 @@ def getVector(x2, x1, y2, y1):
 
     return orderedPair
 
+<<<<<<< HEAD
 
 if __name__ == '__main__':
+=======
+>>>>>>> 0dbf48f1cfd823d4b59687e0a0ca2bc4a7d63aa9
     main()
