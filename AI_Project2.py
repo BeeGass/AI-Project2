@@ -7,7 +7,7 @@ moveNum = 0 #The move number in the game
 
 def main():
     board = Board()
-    result = PlayGame(board) #0 for tie, 1 for AI player wins, 2 for opposing player wins
+    PlayGame(board) #0 for tie, 1 for AI player wins, 2 for opposing player wins
 
 #Function which will play the Gomoku game until completion
 #board: An array represetnation of the game board
@@ -36,7 +36,7 @@ def PlayGame(board):
             print("Turn "+str(moveNum)+" completed.")
             moveNum += 1
             input("Press any key to continue . . .")
-            return PlayGame(board) #repeats until game completion
+            PlayGame(board) #repeats until game completion
 
 def getDistance(x2, x1, y2, y1):
     dist = math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2))
@@ -253,9 +253,6 @@ def CalculateBoardValue():
         else:
             print("error in CalculateBoardValue()")
 
-
-
-
 ##Calcultes the utility for home team agent
 def CalculateSelfUtility(inputCol, inputRow):
     CalculateBoardValue()
@@ -279,12 +276,13 @@ def CalculateOpposingUtility():
 
     return 1
 
+#TODO add list of moves
 def MiniMax(inputPosition, inputDepth, inputMaximizingPlayer):
 
     #if the input depth is met or the game is over out put the evaluation of how good the move last made was
     if inputDepth == 0 or gameOver:
         positionEval = CalculateSelfUtility()
-        return positionEval
+        return positionEval #nodes associated with evals
 
     if inputMaximizingPlayer: #this is a boolean value
         maxEval = -math.INF
@@ -390,6 +388,7 @@ def getVector(x2, x1, y2, y1):
     orderedPair = Vector(x = xCoord, y = yCoord)
 
     return orderedPair
+
 
 if __name__ == '__main__':
     main()
