@@ -1,17 +1,12 @@
-import os.path
 from os import path
-from Board import Board
-from Board import BoardConfiguration
-from Board import Vector
-import ConfigsEnum
-import math
+from Board import Board, Vector, BoardConfiguration
+import ConfigsEnum, math, paths
 groupName = "Sigmoid"
 
 moveNum = 0 #The move number in the game
 
 def main():
     board = Board()
-    
     result = PlayGame(board) #0 for tie, 1 for AI player wins, 2 for opposing player wins
 
 #Function which will play the Gomoku game until completion
@@ -20,34 +15,62 @@ def PlayGame(board):
     global moveNum
     #while not path.exists(groupName+".go"): #waits until it is the player's move
     #   pass
-    if path.exists("endgame"):
-        #end of game
-        print("End of game")
-        return 0
-    else:
-        #read opponent's move here
-        if path.exists("move_file"):
-            f = open("move_file").read()
-            lines = f.split()
-            row = LetterToNumber(lines[1])
-            col = int(lines[2])
-            board.placePiece(row, col, 0, 2, moveNum) #makes opponent move
+    if path.exists(paths.goFile)
+        if path.exists(paths.endgame):
+            #end of game
+            print("End of game")
+            exit(code=0)
+        else:
+            #read opponent's move here
+            if path.exists(paths.move_file):
+                f = open(paths.move_file).read()
+                lines = f.split()
+                row = LetterToNumber(lines[1])
+                col = int(lines[2])
+                board.placePiece(row, col, 0, 2, moveNum) #makes opponent move
+                moveNum += 1
+            #make move here
+            board.currentGameState.boardList[0][0] = 1
+            board.currentGameState.boardList[1][1] = 1
+            print(str(PerformSpiral(board, 15, 15, 1)))
+            print("Turn "+str(moveNum)+" completed.")
             moveNum += 1
-        #make move here
-        board.currentGameState.boardList[0][0] = 1
-        board.currentGameState.boardList[1][1] = 1
-        print(str(PerformSpiral(board, 15, 15, 1)))
-        print("Turn "+str(moveNum)+" completed.")
-        moveNum += 1
-        input("Press any key to continue . . .")
-        return PlayGame(board) #repeats until game completion
+            input("Press any key to continue . . .")
+            return PlayGame(board) #repeats until game completion
 
 def getDistance(x2, x1, y2, y1):
     dist = math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2))
 
     return dist
 
-def PerformSpiral(boardConfig, inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
+def getVector(x2, x1, y2, y1):
+    xCoord = x2 - x1
+    yCoord = y2 - y1
+    orderedPair = Vector(x = xCoord, y = yCoord)
+
+    return orderedPair
+#------------------------------------------------------------------
+
+def isAdjacentCell():
+    dist = getDistance()
+
+    if dist > 1:
+        #DO SOME SHIT
+        print()
+    elif dist == 1:
+        #DO SOME SHIT
+        print()
+    elif dist == 0:
+        #YOU GOT A PROBLEM BECAUSE THE DISTANCE SHOULDNT BE 0
+        print("Error: distance shouldnt be 0")
+    else:
+        print("Error: issue in the isAdjacentCell() function")
+
+def CalculateBoardState():
+
+    return 1
+
+def PerformSpiral(inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
     X = inputBoardDimensionX
     Y = inputBoardDimensionY
     turn = inputPlayerTurn
@@ -121,7 +144,7 @@ def PerformSpiral(boardConfig, inputBoardDimensionX, inputBoardDimensionY, input
                         else:
                             print("error in the distance portion of PerformSpiral()")
 
-                        stoneCounterForSelf = 0 
+                        stoneCounterForSelf = 0
                         stoneArrForSelf = []
 
             elif spot == 2:
@@ -153,7 +176,7 @@ def PerformSpiral(boardConfig, inputBoardDimensionX, inputBoardDimensionY, input
                         else:
                             print("error in the distance portion of PerformSpiral()")
 
-                        stoneCounterForSelf = 0 
+                        stoneCounterForSelf = 0
                         stoneArrForSelf = []
 
         if x == y or (x < 0 and x == -y) or (x > 0 and x == 1-y):
@@ -166,7 +189,7 @@ def MakeStartingNode(inputStartingMove):
     theMove = inputStartingMove
     firstNode = MiniMaxNode(parent = None, children = None, currentVal = theMove.utility, currentMove = theMove)
 
-    return firstNode 
+    return firstNode
 
 #Calculates the utility value for a given path
 def calcPathUtil (boardState, startPos, dir, player):
@@ -225,9 +248,9 @@ def CalculateBoardValue():
     for i in 1:
         if i == 0:
             PerformSpiral(widthOfBoard, heightOfBoard, i)
-        elif i == 1: 
+        elif i == 1:
             PerformSpiral(widthOfBoard, heightOfBoard, i)
-        else: 
+        else:
             print("error in CalculateBoardValue()")
 
 
@@ -235,7 +258,7 @@ def CalculateBoardValue():
 
 ##Calcultes the utility for home team agent
 def CalculateSelfUtility(inputCol, inputRow):
-    CalculateBoardValue() 
+    CalculateBoardValue()
 
     """
     w1 × the number of five-in-row
@@ -276,41 +299,35 @@ def MiniMax(inputPosition, inputDepth, inputMaximizingPlayer):
             eval = MiniMax(child, depth - 1, true)
             minEval = min(minEval, eval)
             return minEval
-   
+
 
 def AlphaBetaPruning(inputPosition, inputDepth, inputAlpha, inputBeta, inputMaximizingPlayer):
     if inputDepth == 0 or gameOver:
         positionEval = CalculateSelfUtility()
         return positionEval
 
-    if inputMaximizingPlayer: 
+    if inputMaximizingPlayer:
         for child in inputPosition:
             eval = Minimax(child, inputDepth - 1, inputAlpha, inputBeta, false)
-            maxEval = max(maxEval, eval) 
+            maxEval = max(maxEval, eval)
 
             alpha = max(alpha, eval)
-            if beta <= alpha: 
+            if beta <= alpha:
                 break
 
             return maxEval
     else:
         for child in inputPosition:
             eval = Minimax(child, inputDepth - 1, inputAlpha, inputBeta, true)
-            minEval = min(minEval, eval) 
+            minEval = min(minEval, eval)
 
             beta = min(beta, eval)
             if beta <= alpha:
                 break
             return minEval
 
-#Gets the two children of an input position
-#inputPosition: The BoardConfiguration to generate moves from
-def getChildren(inputPosition):
-    return None
-
 #------------------------------------------------------------------
 #Heuristics that limit the depth to which the game tree is expanded
-
 def CuttingOffSearch():
     return 1
 
@@ -328,7 +345,7 @@ def TaperedSearch():
     return 1
 
 #------------------------------------------------------------------
-#Big Boi Algorithm 
+#Big Boi Algorithm
 #https://en.wikipedia.org/wiki/Monte_Carlo_tree_search
 
 def MonteCarloTreeSearch():
@@ -336,21 +353,18 @@ def MonteCarloTreeSearch():
     return 1
 
 #------------------------------------------------------------------
-##function to read in move_file to determind moves made from opposing agent 
-def ReadFile():
-    return 1
 
-##inputCol is the number associated with the column 
-#that the agent gives which NumberToLetter translates 
+##inputCol is the number associated with the column
+#that the agent gives which NumberToLetter translates
 #into a capital letter associated with the number
-#example: 1->A 
+#example: 1->A
 #         2->B
 #         3->C
 def NumberToLetter(inputColAsNumber):
     theLetter = chr(ord('@') + inputColAsNumber)
     return theLetter
 
-##The opposite of NumberToLetter. It takes in a letter and converts it 
+##The opposite of NumberToLetter. It takes in a letter and converts it
 #into a number
 def LetterToNumber(inputColAsLetter):
     theNumber = ord(inputColAsLetter) - ord('@')
@@ -377,4 +391,5 @@ def getVector(x2, x1, y2, y1):
 
     return orderedPair
 
-main()
+if __name__ == '__main__':
+    main()
