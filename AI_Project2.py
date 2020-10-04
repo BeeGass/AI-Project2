@@ -211,7 +211,6 @@ def CreateChildren(prevMove, depthLimit, currentDepth):
     return children
 
 
-
 ##spiral() will perform a spiraling search from the point that was found at (inputXPlaceOnBoard, inputYPlaceOnBoard). 
 #The search will search up 2 cells away from the center point and will stop if it finds nothing
 #in the event it does find an empty place to potentially put a stone it will add it to the ListOfPreviousPossibleMoves to avoid any potential duplicated moves
@@ -330,6 +329,7 @@ def genPossibleMoves(inputMove, player):
         PerformFirstMove() #TODO: implement this function 
 
     return ListOfAllPossibleMoves #returns all possible moves
+
 
 #Calculates the utility value for a given path
 def calcPathUtil (boardState, startPos, dir, player):
@@ -516,11 +516,6 @@ def OutputFile(inputRow, inputCol):
 
     return f
 
-#Evaluates the board and returns the utility value
-#config: The board configuration
-def boardConfigEval(config):
-    return 1
-
 ##getVector will take in two different points and find the vector associated with the two to create a 
 #sense of direction to search for a potential continuation of connected stones
 def getVector(x2, x1, y2, y1):
@@ -530,5 +525,4 @@ def getVector(x2, x1, y2, y1):
 
     return orderedPair
 
-if __name__ == '__main__':
     main()
