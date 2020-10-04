@@ -7,7 +7,6 @@ moveNum = 0 #The move number in the game
 
 def main():
     board = Board()
-
     result = PlayGame(board) #0 for tie, 1 for AI player wins, 2 for opposing player wins
 
 #Function which will play the Gomoku game until completion
@@ -354,9 +353,6 @@ def MonteCarloTreeSearch():
     return 1
 
 #------------------------------------------------------------------
-##function to read in move_file to determind moves made from opposing agent
-def ReadFile():
-    return 1
 
 ##inputCol is the number associated with the column
 #that the agent gives which NumberToLetter translates
@@ -395,4 +391,5 @@ def getVector(x2, x1, y2, y1):
 
     return orderedPair
 
-main()
+if __name__ == '__main__':
+    main()
