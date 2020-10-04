@@ -17,13 +17,18 @@ class Board:
     #row: The row
     #col: The column
     #Player: 1 if AI player, 2 if opponent
+    #Returns true if move was successful, false otherwise
     def placePiece(self, row, col, utility, player, moveNum):
+        if self.currentGameState.boardList[row][col] != 0 and moveNum != 1: #if the spot on the board is taken and it is not the second
+            #move of the game (where placing a piece over another is a legal move)
+            return False
         self.currentGameState.boardList[row][col] = player
         if player == 1:
             self.savedMovesSelf.append(Move(player, row, col, utility, self.currentGameState, 0))
         if player == 2:
             self.savedMovesOpp.append(Move(player, row, col, utility, self.currentGameState, 0))
-
+        return True
+s
 class Move: #class representing a move made by either player
     player: int #the player that made the move
     row: int #the row the piece was placed in
@@ -42,9 +47,24 @@ class Move: #class representing a move made by either player
 
 #Class representing a direction
 class Vector:
-    x: int #x coordinate 
-    y: int #y coordinate
+    x: int #horizontal offset
+    y: int #vertical offset
 
     def __init__(self, x, y):
         self.x = x
         self.y = y
+
+
+class MiniMaxNode:
+    parent: MiniMaxNode #collection of arbitrary moves to current aribitrary point 
+    children: list #collection of arbitrary moves representing arbitrary amount of children 
+    currentVal: Move #the metric for utility 
+    currentMove: Move #the move so as to reference the board state later on
+    evalForNextMove: int 
+
+    def __init__(self, parent, children, currentVal):
+        self.parent = parent
+        self.children = children
+        self.currentVal = currentVal
+        self.currentMove = currentMove
+        self.evalForNextMove = evalForNextMove

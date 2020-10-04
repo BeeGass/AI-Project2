@@ -3,8 +3,7 @@ from os import path
 from Board import Board
 from Board import BoardConfiguration
 from Board import Vector
-from Board import Move
-
+import ConfigsEnum
 import math
 groupName = "Sigmoid"
 
@@ -12,6 +11,7 @@ moveNum = 0 #The move number in the game
 
 def main():
     board = Board()
+    
     result = PlayGame(board) #0 for tie, 1 for AI player wins, 2 for opposing player wins
 
 #Function which will play the Gomoku game until completion
@@ -34,63 +34,14 @@ def PlayGame(board):
             board.placePiece(row, col, 0, 2, moveNum) #makes opponent move
             moveNum += 1
         #make move here
+        board.currentGameState.boardList[0][0] = 1
+        board.currentGameState.boardList[1][1] = 1
+        print(str(PerformSpiral(board, 15, 15, 1)))
         print("Turn "+str(moveNum)+" completed.")
         moveNum += 1
         input("Press any key to continue . . .")
-        PlayGame(board) #repeats until game completion
+        return PlayGame(board) #repeats until game completion
 
-#Evaluation function that returns the utility value of a given board configuration
-#boardConfig: BoardConfiguration, the board config to evaluate
-#player: int, the player to evaluate the utility for
-def BoardEval(boardConfig, player):
-    #ints representing weights for possible stone configurations
-    #fiveWeight, liveFourWeight, deadFourWeight, liveThreeWeight, deadThree, liveTwo, deadTwo: int
-    #ints representing the counts for each configuration
-    fiveCnt, liveFourCnt, deadFourCnt, liveThreeCnt, deadThreeCnt, liveTwoCnt, deadTwoCnt = 0
-    eval = 0 #the return value for the function
-    #-------------------------
-    #scenario for finding a direction of movement
-    r = 0
-    c = 0
-    movementDir = Dir(0,0) #dummy direction for implementation's sake
-    successiveCount = 0 #count of successive stones for current player
-    totalCount = 0 #count of the total number of stones for current player in the direction the search is looking
-    block = False #bool representing if there is a piece blocking on any side
-    gap = False #bool representing if there is a gap
-    currentPos = Dir(r, c) #represents the current position
-    while currentPos.h < len(boardConfig) and currentPos.v < len(boardConfig[0]): #makes sure the coords are within the bounds of the board
-        if boardConfig[r+movementDir.h][c+movementDir.v] == player:
-            totalCount += 1 #add to the running total for the current direction
-            if not gap: successiveCount += 1 #if no gap, add to successive count
-        elif boardConfig[r+movementDir.h][c+movementDir.v] != 0: #check to see if it is enemy piece
-            if not block:
-                block = True
-            else:
-                break #break out of the for loop once >1 block has been found
-        else: #no piece present
-            if not gap:
-                gap = True
-                successiveCount = 0
-            else:
-                break #break out of the for loop if >1 gap is found
-
-    if totalCount == 5: fiveCnt += 1
-    if totalCount == 4:
-        if block: deadFourCnt += 1 #if the move is blocked on one side, it is dead
-        else: liveFourCnt += 1 #if it is not blocked, it is live
-    if totalCount == 3:
-        if block: deadThreeCnt += 1
-        else: liveThreeCnt
-    if totalCount == 2:
-        if block: deadTwoCnt += 1
-        else: liveTwoCnt += 1
-    
-    #------------------------------------
-
-    if player == 1:
-        eval -= BoardEval(boardConfig, 2) #subtract the opponent's eval score
-
-#------------------------------------------------------------------
 def getDistance(x2, x1, y2, y1):
     dist = math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2))
 
@@ -127,6 +78,9 @@ def PerformSpiral(inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
     X = inputBoardDimensionX
     Y = inputBoardDimensionY
     turn = inputPlayerTurn
+    oppTurn = 2 if turn == 1 else 1 #assigns opponent turn to opposite of current turn
+
+    totalUtil = 0 #the utility value to return
 
     NumOfFives = 0 # the number of five-in-row
     NumOfFours = 0 # the number of fours
@@ -139,6 +93,8 @@ def PerformSpiral(inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
     y = 0
     dx = 0
     dy = -1
+    adjX = 0
+    adjY = 0
 
     stoneArrForOpp = []
     stoneCounterForOpp = 0
@@ -149,12 +105,17 @@ def PerformSpiral(inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
     for i in range(max(X, Y)**2):
         if (int(-X/2) < x <= int(X/2)) and (int(-Y/2) < y <= int(Y/2)):
             location = []
-            location.append(x)
-            location.append(y)
+            adjX = x+7
+            adjY = y+7
+            location.append(adjX)
+            location.append(adjY)
 
-            spot = Board.currentGameState.boardList[x][y]
+            print("X: "+str(adjX)+", Y: "+str(adjY))
+
+            spot = boardConfig.currentGameState.boardList[x][y]
 
             if spot == 1:
+
                 if not stoneArrForSelf:
                     stoneArrForSelf = location
                 elif stoneArrForSelf:
@@ -162,6 +123,10 @@ def PerformSpiral(inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
 
                     if dist < 2:
                         stoneCounterForSelf = stoneCounterForSelf + 1
+                        #add the utility for the current player and subtract the utility for the opposing player
+                        totalUtil += calcPathUtil(boardConfig.currentGameState.boardList, Vector(stoneArrForSelf[0], stoneArrForSelf[1]), getVector(location[0], stoneArrForSelf[0], location[1], stoneArrForSelf[1]), turn)
+                        totalUtil -= calcPathUtil(boardConfig.currentGameState.boardList, Vector(stoneArrForSelf[0], stoneArrForSelf[1]), getVector(location[0], stoneArrForSelf[0], location[1], stoneArrForSelf[1]), oppTurn)
+                        print(totalUtil)
                         stoneArrForSelf = []
                         stoneArrForSelf = location
                     elif dist > 1:
@@ -219,10 +184,66 @@ def PerformSpiral(inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
                         stoneArrForSelf = []
 
         if x == y or (x < 0 and x == -y) or (x > 0 and x == 1-y):
-            dx = -dy 
-            dy = dx
-        x = x+dx 
-        y = y+dy
+            dx, dy = -dy, dx
+        x, y = x+dx, y+dy
+
+    return totalUtil
+
+def MakeStartingNode(inputStartingMove):
+    theMove = inputStartingMove
+    firstNode = MiniMaxNode(parent = None, children = None, currentVal = theMove.utility, currentMove = theMove)
+
+    return firstNode 
+
+#Calculates the utility value for a given path
+def calcPathUtil (boardState, startPos, dir, player):
+    currentPos = Vector(startPos.x + dir.x, startPos.y + dir.y); #represents the current position in the search
+    pathLength = 1 #represents the length of the path
+    block = 0 #0 if path is not obstructed on either side, 1 if obstructed on 1 side, 2 if obstructed on both sides
+    gap = False #bool representing if there is a gap
+
+    #search in the positive direction
+    while currentPos.x < len(boardState) and currentPos.y < len(boardState[0]) and pathLength < 5: #makes sure the coords are within the bounds of the board
+        if boardState[currentPos.x][currentPos.y] == player:
+            pathLength += 1 #add to the running total for the current direction
+        elif boardState[currentPos.x][currentPos.y] != 0: #check to see if it is enemy piece
+            block += 1
+            break;
+        else: #no piece present
+            if not gap:
+                gap = True
+            else:
+                break #break out of the for loop if >1 gap is found
+        currentPos.x += 1;
+        currentPos.y += 1;
+
+        #todo implement turns
+
+    currentPos = Vector(startPos.x - dir.x, startPos.y - dir.y); #begin search in other direction
+
+    #search in the positive direction
+    while currentPos.x > 0 and currentPos.y > 0 and pathLength < 5: #makes sure the coords are within the bounds of the board
+        if boardState[currentPos.x][currentPos.y] == player:
+            pathLength += 1 #add to the running total for the current direction
+        elif boardState[currentPos.x][currentPos.y] != 0: #check to see if it is enemy piece
+            block += 1
+            break;
+        else: #no piece present
+            if not gap:
+                gap = True
+            else:
+                break #break out of the for loop if >1 gap is found
+        currentPos.x -= 1;
+        currentPos.y -= 1;
+
+    if pathLength == 5:
+       return 10
+    if block == 2 and not gap: #if the path is obstructed on both sides and there is no gap in the middle, the position is worth nothing
+        return 0
+    if pathLength == 2:
+        return 5
+
+    return 0
 
 def CalculateBoardValue():
     widthOfBoard = 15
@@ -369,5 +390,12 @@ def OutputFile(inputRow, inputCol):
 #config: The board configuration
 def boardConfigEval(config):
     return 1
+
+def getVector(x2, x1, y2, y1):
+    xCoord = x2 - x1
+    yCoord = y2 - y1
+    orderedPair = Vector(x = xCoord, y = yCoord)
+
+    return orderedPair
 
 main()
