@@ -28,7 +28,7 @@ class Board:
         if player == 2:
             self.savedMovesOpp.append(Move(player, row, col, utility, self.currentGameState, 0))
         return True
-s
+        
 class Move: #class representing a move made by either player
     player: int #the player that made the move
     row: int #the row the piece was placed in
@@ -36,6 +36,7 @@ class Move: #class representing a move made by either player
     utility: float #the utility represented by the move
     moveXBoardConfig : BoardConfiguration #the board configuration after the move has been made
     moveNum: int #the move number in the game
+    firstToMove: bool #true if firstToMove is home team, false if opposing player
 
     def __init__(self, player, row, col, utility, board, moveNum):
         self.player = player
@@ -47,8 +48,8 @@ class Move: #class representing a move made by either player
 
 #Class representing a direction
 class Vector:
-    x: int #horizontal offset
-    y: int #vertical offset
+    x: int #x coordinate
+    y: int #y coordinate
 
     def __init__(self, x, y):
         self.x = x
@@ -56,13 +57,13 @@ class Vector:
 
 
 class MiniMaxNode:
-    parent: MiniMaxNode #collection of arbitrary moves to current aribitrary point 
-    children: list #collection of arbitrary moves representing arbitrary amount of children 
-    currentVal: Move #the metric for utility 
+    parent: MiniMaxNode #collection of arbitrary moves to current aribitrary point
+    children: list #collection of arbitrary moves representing arbitrary amount of children
+    currentVal: int #the metric for utility
     currentMove: Move #the move so as to reference the board state later on
-    evalForNextMove: int 
+    evalForNextMove: int
 
-    def __init__(self, parent, children, currentVal):
+    def __init__(self, parent, children, currentVal, currentMove, evalForNextMove):
         self.parent = parent
         self.children = children
         self.currentVal = currentVal
