@@ -1,6 +1,6 @@
 from os import path
 from Board import Board, Vector, BoardConfiguration
-import math, paths
+import ConfigsEnum, math, paths
 import numpy as np
 groupName = "Sigmoid"
 moveNum = 0 #The move number in the game
@@ -19,7 +19,7 @@ def PlayGame(board):
     global moveNum
     print("Waiting for other player. . .")
     while not path.exists(paths.goFile): #waits until it is the player's move
-       pass
+        pass
     if path.exists(paths.endgame):
         #end of game
         print("End of game")
@@ -38,10 +38,10 @@ def PlayGame(board):
             #make move here
             board.currentGameState.boardList[0][0] = 1
             board.currentGameState.boardList[1][1] = 1
-            print(str(BoardEval(board, 15, 15, 1)))
-            print("Turn "+str(moveNum)+" completed.")
-            moveNum += 1
-            input("Press any key to continue . . .")
+            print(str(BoardEval(board, 15, 15, 1)))#TODO same as comment on line 44
+            print("Turn "+str(moveNum)+" completed.")#TODO same as comment on line 44
+            moveNum += 1 #TODO why are we adding moveNum here again, we already did one time above for the enemy turn
+            input("Press any key to continue . . .") #TODO we should probably get rid of this, the 10 second counter starts the moment the referee makes the new file for us, plus running headless will make it faster
         #make move here
         makeMove(board)
         print("Turn "+str(moveNum)+" completed.")
@@ -50,6 +50,29 @@ def PlayGame(board):
 
 #Gets the optimal move using the minimax algorithm with alpha-beta pruning and performs the move
 #board: The current game board
+def makeMoveV2(board : Board):
+    global moveNum
+    ##########
+    #first move shit that im not sure of. Pseudo code
+    if moveNum is 0 or 1:
+        startingMove = makefirstMove(board) #TODO create me father
+        #MakeStartingNode(startingMove) #TODO god left me unfinished
+        pass
+    #########
+
+    #Tree birth: Origins Part 1, the start
+    localSpiral(X, Y, listOfPreviousMoves, inputXBoard, inputXPlaceOnBoard, inputYPlaceOnBoard)
+    CreateTree(board.currentGameState, depthLimit) #TODO what is the purpose of depthLimit
+
+    #the tree opitimization Saga
+    BoardEval(board, inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn) #TODO is inputPlayerTurn pointless? We are never going to get to run this on an active enemy turn because of the while loop checking for the .go file
+    inputMove, inputDepth = AlphaBetaPruning(inputMove, inputDepth, inputAlpha, inputBeta, inputMaximizingPlayer)
+
+    #The minimax and final choice conclusion
+    inputRow, inputCol = MiniMax(inputMove, inputDepth, inputMaximizingPlayer) #should produce inputRow and inputCol
+    #the submission spinoff
+    OutputFile(inputRow, inputCol)
+
 def makeMove(board: Board):
     global moveNum
     global groupName
@@ -63,6 +86,12 @@ def makeMove(board: Board):
     f = open("move_file", "w") #open file to write over
     f.write(strToWrite) #write the inputted move
     f.close()
+
+def makefirstMove(board: board):
+    if moveNum is 0:
+        board.placePiece(7, 7, utility, 1, moveNum) #TODO how do i get the utility for the first move and why is this stored
+    else:
+        board.placePiece() #TODO place on top of enemy move if its a good move
 #------------------------------------------------------------------
 
 #Tree creation functions
@@ -146,8 +175,6 @@ def getVector(x2, x1, y2, y1):
     return orderedPair
 #------------------------------------------------------------------
 
-
-
 #Board evaluation functions
 #------------------------------------------------------------------
 def BoardEval(board, inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
@@ -207,7 +234,7 @@ def BoardEval(board, inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn
 
     return totalUtil
 
-##spiral() will perform a spiraling search from the point that was found at (inputXPlaceOnBoard, inputYPlaceOnBoard).
+##localSpiral() will perform a spiraling search from the point that was found at (inputXPlaceOnBoard, inputYPlaceOnBoard).
 #The search will search up 2 cells away from the center point and will stop if it finds nothing
 #in the event it does find an empty place to potentially put a stone it will add it to the ListOfPreviousPossibleMoves to avoid any potential duplicated moves
 #     0   1   2   3   4   5   6   7   8   9  10  11  12  13  14
@@ -368,7 +395,36 @@ def MiniMax(inputMove, inputDepth, inputMaximizingPlayer):
             minEval = min(minEval, eval)
             return minEval
 
+#ripped from geek4geeks, returns a single value tho, worth a look
+def MinimaxABprune(depth, nodeIndex, maximizingPlayer, values, alpha, beta):
+    # Terminating condition. i.e
+    # leaf node is reached
+    if depth == 3:
+        return values[nodeIndex]
+    if maximizingPlayer:
+        best = MIN
+        # Recur for left and right children
+        for i in range(0, 2):
+            val = MinimaxABprune(depth + 1, nodeIndex * 2 + i, False, values, alpha, beta)
+            best = max(best, val)
+            alpha = max(alpha, best)
+            # Alpha Beta Pruning
+            if beta <= alpha:
+                break
+        return best
+    else:
+        best = MAX
+        # Recur for left and
+        # right children
+        for i in range(0, 2):
+            val = MinimaxABprune(depth + 1, nodeIndex * 2 + i, True, values, alpha, beta)
+            best = min(best, val)
+            beta = min(beta, best)
+            # Alpha Beta Pruning
+            if beta <= alpha:
+                break
 
+        return best
 def AlphaBetaPruning(inputMove, inputDepth, inputAlpha, inputBeta, inputMaximizingPlayer):
     if inputDepth == 0 or gameOver:
         positionEval = CalculateSelfUtility()
@@ -427,7 +483,6 @@ def UCB1(node):
     return ucb
 
 #------------------------------------------------------------------
-
 
 #File helper functions
 #------------------------------------------------------------------
