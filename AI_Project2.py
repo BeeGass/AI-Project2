@@ -14,8 +14,9 @@ def main():
 def PlayGame(board):
     global moveNum
     #while not path.exists(groupName+".go"): #waits until it is the player's move
+    #   print("Waiting for other player. . ."
     #   pass
-    if path.exists(paths.goFile)
+    if path.exists(paths.goFile):
         if path.exists(paths.endgame):
             #end of game
             print("End of game")
