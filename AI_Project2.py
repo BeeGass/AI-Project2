@@ -5,6 +5,9 @@ import numpy as np
 groupName = "Sigmoid"
 moveNum = 0 #The move number in the game
 
+#Base game functions
+#------------------------------------------------------------------
+
 def main():
     board = Board()
     PlayGame(board) #0 for tie, 1 for AI player wins, 2 for opposing player wins
@@ -35,7 +38,7 @@ def PlayGame(board):
             #make move here
             board.currentGameState.boardList[0][0] = 1
             board.currentGameState.boardList[1][1] = 1
-            print(str(PerformSpiral(board, 15, 15, 1)))
+            print(str(BoardEval(board, 15, 15, 1)))
             print("Turn "+str(moveNum)+" completed.")
             moveNum += 1
             input("Press any key to continue . . .")
@@ -44,20 +47,6 @@ def PlayGame(board):
         print("Turn "+str(moveNum)+" completed.")
         moveNum += 1
         PlayGame(board) #repeats until game completion
-
-#distance formula
-def getDistance(x2, x1, y2, y1):
-    dist = math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2))
-
-    return dist
-
-def getVector(x2, x1, y2, y1):
-    xCoord = x2 - x1
-    yCoord = y2 - y1
-    orderedPair = Vector(x = xCoord, y = yCoord)
-
-    return orderedPair
-#------------------------------------------------------------------
 
 #Gets the optimal move using the minimax algorithm with alpha-beta pruning and performs the move
 #board: The current game board
@@ -74,40 +63,99 @@ def makeMove(board: Board):
     f = open("move_file", "w") #open file to write over
     f.write(strToWrite) #write the inputted move
     f.close()
+#------------------------------------------------------------------
 
-def isAdjacentCell():
-    dist = getDistance()
+#Tree creation functions
+#------------------------------------------------------------------
+def MakeStartingNode(inputStartingMove):
+    theMove = inputStartingMove
+    firstNode = MiniMaxNode(parent = None, children = None, currentVal = theMove.utility, currentMove = theMove)
 
-    if dist > 1:
-        #DO SOME SHIT
-        print()
-    elif dist == 1:
-        #DO SOME SHIT
-        print()
-    elif dist == 0:
-        #YOU GOT A PROBLEM BECAUSE THE DISTANCE SHOULDNT BE 0
-        print("Error: distance shouldnt be 0")
-    else:
-        print("Error: issue in the isAdjacentCell() function")
+    return firstNode
 
-def CalculateBoardState():
+def CreateTree(inputStartingMove, depthLimit):
+    rootNode = firstNode = MiniMaxNode(parent = None, children = None, currentVal = inputStartingMove.utility, currentMove = inputStartingNode)
+    rootNode.children = CreateChildren(rootNode.currentMove, depthLimit, 0)
 
-    return 1
+    return rootNode
 
-def PerformSpiral(board, inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
+def CreateChildren(prevMove, depthLimit, currentDepth):
+    children = []
+    currentTurn = currentDepth % 2 + 1
+    childMoves = genPossibleMoves(prevMove, currentDepth % 2 + 1)
+
+    if (currentDepth >= depthLimit):
+        lastChild = []
+        return lastChild
+
+    currentDepth += 1
+    for move in childMoves:
+        children.append(MiniMaxNode(parent  = prevMove, children = CreateChildren(move, depthLimit, currentDepth), currentVal = -1, currentMove = move, evalForNextMove = -1))
+
+    return children
+
+## genPossibleMoves will iterate through an entire board and find all possible moves that are within 2 spaces of any given piece
+def genPossibleMoves(inputMove, player):
+
+    inputMove.moveXBoardConfig = inputXBoard
+    theNumber = inputMove.moveNum + 1
+
+    #this two define the search space of a given piece should be within 2 blocks of it
+    widthOfSearch = 4
+    lengthOfSearch = 4
+
+    #Creation of the list that will hold all possible moves on the current board
+    ListOfAllPossibleMoves = []
+
+    for i,j in range(len(inputXBoard.boardList[i][j])): #iterate through the board
+        #xPlaceOnBoard and yPlaceOnBoard will be referenced within spiral()
+        xPlaceOnBoard = i
+        yPlaceOnBoard = j
+
+        #get current value at cell (i, j)
+        theSpot = inputXBoard.boardList[i][j]
+
+        if theSpot == 1 or theSpot == 2: #if the cell is either a "1" or "2" player search for a possible move
+            ListOfMovesForPiece = localSpiral(widthOfSearch, lengthOfSearch, inputXBoard, xPlaceOnBoard, yPlaceOnBoard) #returns a list of possible moves given the piece found at (i, j)
+
+            for move in ListOfMovesForPiece: #if the move from list of moves found at (i, j) is not within the total list of all possible moves, given the boardstate inputted, add to the list
+                if not move in ListOfAllPossibleMoves:
+                    ListOfAllPossibleMoves.append(Move(player, row = move.x, col = move.y, utility = -1, board = inputXBoard.boardList.append(move), moveNum = theNumber))
+
+    if ListOfAllPossibleMoves == []: #if the list is empty then no moves have been made and we need to perform the first move
+        PerformFirstMove() #TODO: implement this function
+
+    return ListOfAllPossibleMoves #returns all possible moves
+#------------------------------------------------------------------
+
+#Math helper functions
+#------------------------------------------------------------------
+#distance formula
+def getDistance(x2, x1, y2, y1):
+    dist = math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2))
+
+    return dist
+
+##getVector will take in two different points and find the vector associated with the two to create a
+#sense of direction to search for a potential continuation of connected stones
+def getVector(x2, x1, y2, y1):
+    xCoord = x2 - x1
+    yCoord = y2 - y1
+    orderedPair = Vector(x = xCoord, y = yCoord)
+
+    return orderedPair
+#------------------------------------------------------------------
+
+
+
+#Board evaluation functions
+#------------------------------------------------------------------
+def BoardEval(board, inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
     X = inputBoardDimensionX
     Y = inputBoardDimensionY
     turn = inputPlayerTurn
     oppTurn = 2 if turn == 1 else 1 #assigns opponent turn to opposite of current turn
-
     totalUtil = 0 #the utility value to return
-
-    NumOfFives = 0 # the number of five-in-row
-    NumOfFours = 0 # the number of fours
-    NumOfThrees = 0 # the number of threes
-    NumOfTwos = 0 # the number of twos
-    NumOfOnes = 0 # the number of ones
-
 
     x = 0
     y = 0
@@ -135,106 +183,29 @@ def PerformSpiral(board, inputBoardDimensionX, inputBoardDimensionY, inputPlayer
 
             spot = boardConfig.currentGameState.boardList[x][y]
 
-            if spot == 1:
+            if spot != 0:
 
                 if not stoneArrForSelf:
                     stoneArrForSelf = location
                 elif stoneArrForSelf:
                     dist = getDistance(stoneArrForSelf[0], location[0], stoneArrForSelf[1], location[1])
-
                     if dist < 2:
                         stoneCounterForSelf = stoneCounterForSelf + 1
                         #add the utility for the current player and subtract the utility for the opposing player
-                        totalUtil += calcPathUtil(boardConfig.currentGameState.boardList, Vector(stoneArrForSelf[0], stoneArrForSelf[1]), getVector(location[0], stoneArrForSelf[0], location[1], stoneArrForSelf[1]), turn)
-                        totalUtil -= calcPathUtil(boardConfig.currentGameState.boardList, Vector(stoneArrForSelf[0], stoneArrForSelf[1]), getVector(location[0], stoneArrForSelf[0], location[1], stoneArrForSelf[1]), oppTurn)
-                        print(totalUtil)
+                        if spot == turn:
+                            totalUtil += calcPathUtil(boardConfig.currentGameState.boardList, Vector(stoneArrForSelf[0], stoneArrForSelf[1]), getVector(location[0], stoneArrForSelf[0], location[1], stoneArrForSelf[1]), turn)
+                        if spot == oppTurn:
+                            totalUtil -= calcPathUtil(boardConfig.currentGameState.boardList, Vector(stoneArrForSelf[0], stoneArrForSelf[1]), getVector(location[0], stoneArrForSelf[0], location[1], stoneArrForSelf[1]), oppTurn)
                         stoneArrForSelf = []
                         stoneArrForSelf = location
                     elif dist > 1:
-                        if stoneCounterForSelf == 1:
-                            NumOfOnes = NumOfOnes + 1
-
-                        elif stoneCounterForSelf == 2:
-                            NumOfTwos = NumOfTwos + 1
-
-                        elif stoneCounterForSelf == 3:
-                            NumOfThrees = NumOfThrees + 1
-
-                        elif stoneCounterForSelf == 4:
-                            NumOfFours = NumOfFours + 1
-
-                        elif stoneCounterForSelf == 5:
-                            NumOfFives = NumOfFives + 1
-
-                        else:
-                            print("error in the distance portion of PerformSpiral()")
-
                         stoneCounterForSelf = 0
                         stoneArrForSelf = []
-
-            elif spot == 2:
-                if not stoneArrForSelf:
-                    stoneArrForSelf = location
-                elif stoneArrForSelf:
-                    dist = getDistance(stoneArrForSelf[0], location[0], stoneArrForSelf[1], location[1])
-
-                    if dist < 2:
-                        stoneCounterForSelf = stoneCounterForSelf + 1
-                        stoneArrForSelf = []
-                        stoneArrForSelf = location
-                    elif dist > 1:
-                        if stoneCounterForSelf == 1:
-                            NumOfOnes = NumOfOnes + 1
-
-                        elif stoneCounterForSelf == 2:
-                            NumOfTwos = NumOfTwos + 1
-
-                        elif stoneCounterForSelf == 3:
-                            NumOfThrees = NumOfThrees + 1
-
-                        elif stoneCounterForSelf == 4:
-                            NumOfFours = NumOfFours + 1
-
-                        elif stoneCounterForSelf == 5:
-                            NumOfFives = NumOfFives + 1
-
-                        else:
-                            print("error in the distance portion of PerformSpiral()")
-
-                        stoneCounterForSelf = 0
-                        stoneArrForSelf = []
-
         if x == y or (x < 0 and x == -y) or (x > 0 and x == 1-y):
             dx, dy = -dy, dx
         x, y = x+dx, y+dy
 
     return totalUtil
-
-def MakeStartingNode(inputStartingMove):
-    theMove = inputStartingMove
-    firstNode = MiniMaxNode(parent = None, children = None, currentVal = theMove.utility, currentMove = theMove)
-
-    return firstNode
-
-def CreateTree(inputStartingMove, depthLimit):
-    rootNode = firstNode = MiniMaxNode(parent = None, children = None, currentVal = inputStartingMove.utility, currentMove = inputStartingNode)
-    rootNode.children = CreateChildren(rootNode.currentMove, depthLimit, 0)
-
-def CreateChildren(prevMove, depthLimit, currentDepth):
-    children = []
-    currentTurn = currentDepth % 2 + 1
-    childMoves = genPossibleMoves(prevMove, currentDepth % 2 + 1)
-
-    if (currentDepth >= depthLimit):
-        lastChild = []
-        return lastChild
-
-    currentDepth += 1
-    for move in childMoves:
-        children.append(MiniMaxNode(parent  = prevMove, children = CreateChildren(move, depthLimit, currentDepth), currentVal = -1, currentMove = move, evalForNextMove = -1))
-
-    return children
-
 
 ##spiral() will perform a spiraling search from the point that was found at (inputXPlaceOnBoard, inputYPlaceOnBoard).
 #The search will search up 2 cells away from the center point and will stop if it finds nothing
@@ -273,7 +244,7 @@ def CreateChildren(prevMove, depthLimit, currentDepth):
 #   +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+                           +---+---+---+---+---+
 #                                                                                        2  |21↑|20←|19←|18←|17←|
 #                                                                                           +---+---+---+---+---+
-def spiral(X, Y, listOfPreviousMoves, inputXBoard, inputXPlaceOnBoard, inputYPlaceOnBoard):
+def localSpiral(X, Y, listOfPreviousMoves, inputXBoard, inputXPlaceOnBoard, inputYPlaceOnBoard):
 
     # trueX and trueY are the x and y values associated with the real game board
     #this is because it can be thought of that spiral() analyzes a the game board a zoomed in manner
@@ -321,41 +292,6 @@ def spiral(X, Y, listOfPreviousMoves, inputXBoard, inputXPlaceOnBoard, inputYPla
 
     return ListOfPreviousPossibleMoves
 
-
-## genPossibleMoves will iterate through an entire board and find all possible moves that are within 2 spaces of any given piece
-def genPossibleMoves(inputMove, player):
-
-    inputMove.moveXBoardConfig = inputXBoard
-    theNumber = inputMove.moveNum + 1
-
-    #this two define the search space of a given piece should be within 2 blocks of it
-    widthOfSearch = 4
-    lengthOfSearch = 4
-
-    #Creation of the list that will hold all possible moves on the current board
-    ListOfAllPossibleMoves = []
-
-    for i,j in range(len(inputXBoard.boardList[i][j])): #iterate through the board
-        #xPlaceOnBoard and yPlaceOnBoard will be referenced within spiral()
-        xPlaceOnBoard = i
-        yPlaceOnBoard = j
-
-        #get current value at cell (i, j)
-        theSpot = inputXBoard.boardList[i][j]
-
-        if theSpot == 1 or theSpot == 2: #if the cell is either a "1" or "2" player search for a possible move
-            ListOfMovesForPiece = spiral(widthOfSearch, lengthOfSearch, inputXBoard, xPlaceOnBoard, yPlaceOnBoard) #returns a list of possible moves given the piece found at (i, j)
-
-            for move in ListOfMovesForPiece: #if the move from list of moves found at (i, j) is not within the total list of all possible moves, given the boardstate inputted, add to the list
-                if not move in ListOfAllPossibleMoves:
-                    ListOfAllPossibleMoves.append(Move(player, row = move.x, col = move.y, utility = -1, board = inputXBoard.boardList.append(move), moveNum = theNumber))
-
-    if ListOfAllPossibleMoves == []: #if the list is empty then no moves have been made and we need to perform the first move
-        PerformFirstMove() #TODO: implement this function
-
-    return ListOfAllPossibleMoves #returns all possible moves
-
-
 #Calculates the utility value for a given path
 def calcPathUtil (boardState, startPos, dir, player):
     currentPos = Vector(startPos.x + dir.x, startPos.y + dir.y); #represents the current position in the search
@@ -394,8 +330,8 @@ def calcPathUtil (boardState, startPos, dir, player):
                 gap = True
             else:
                 break #break out of the for loop if >1 gap is found
-        currentPos.x -= 1;
-        currentPos.y -= 1;
+        currentPos.x -= 1
+        currentPos.y -= 1
 
     if pathLength == 5:
        return 10
@@ -405,44 +341,14 @@ def calcPathUtil (boardState, startPos, dir, player):
         return 5
 
     return 0
+#------------------------------------------------------------------
 
-def CalculateBoardValue():
-    widthOfBoard = 15
-    heightOfBoard = 15
 
-    for i in 1:
-        if i == 0:
-            PerformSpiral(widthOfBoard, heightOfBoard, i)
-        elif i == 1:
-            PerformSpiral(widthOfBoard, heightOfBoard, i)
-        else:
-            print("error in CalculateBoardValue()")
 
-##Calcultes the utility for home team agent
-def CalculateSelfUtility(inputCol, inputRow):
-    CalculateBoardValue()
-
-    """
-    w1 × the number of five-in-row
-    w2 × the number of live-fours
-    w3 × the number of dead-fours
-    w4 × the number of live-threes
-    w5 × the number of dead-threes
-    w6 × the number of live-twos
-    w7 × the number of dead-twos
-    w8 x the number of live-ones
-    w9 x the number of dead-ones
-    """
-
-    return 1
-
-##Calcultes the utility for away team agent
-def CalculateOpposingUtility():
-
-    return 1
-
+#Algorithms
+#------------------------------------------------------------------
 #TODO add list of moves
-def MiniMax(inputPosition, inputDepth, inputMaximizingPlayer):
+def MiniMax(inputMove, inputDepth, inputMaximizingPlayer):
     #if the input depth is met or the game is over out put the evaluation of how good the move last made was
     if inputDepth == 0 or gameOver:
         positionEval = CalculateSelfUtility()
@@ -451,25 +357,25 @@ def MiniMax(inputPosition, inputDepth, inputMaximizingPlayer):
     if inputMaximizingPlayer: #this is a boolean value
         maxEval = -math.INF
 
-        for child in inputPosition:
+        for child in inputMove:
             eval = MiniMax(child, inputDepth - 1, false)
             maxEval = max(maxEval, eval)
             return maxEval
     else:
         minEval = math.inf
-        for child in inputPosition:
+        for child in inputMove:
             eval = MiniMax(child, depth - 1, true)
             minEval = min(minEval, eval)
             return minEval
 
 
-def AlphaBetaPruning(inputPosition, inputDepth, inputAlpha, inputBeta, inputMaximizingPlayer):
+def AlphaBetaPruning(inputMove, inputDepth, inputAlpha, inputBeta, inputMaximizingPlayer):
     if inputDepth == 0 or gameOver:
         positionEval = CalculateSelfUtility()
         return positionEval
 
     if inputMaximizingPlayer:
-        for child in inputPosition:
+        for child in inputMove:
             eval = Minimax(child, inputDepth - 1, inputAlpha, inputBeta, false)
             maxEval = max(maxEval, eval)
 
@@ -479,7 +385,7 @@ def AlphaBetaPruning(inputPosition, inputDepth, inputAlpha, inputBeta, inputMaxi
 
             return maxEval
     else:
-        for child in inputPosition:
+        for child in inputMove:
             eval = Minimax(child, inputDepth - 1, inputAlpha, inputBeta, true)
             minEval = min(minEval, eval)
 
@@ -487,18 +393,15 @@ def AlphaBetaPruning(inputPosition, inputDepth, inputAlpha, inputBeta, inputMaxi
             if beta <= alpha:
                 break
             return minEval
+#------------------------------------------------------------------
+
+
 
 #------------------------------------------------------------------
 #Heuristics that limit the depth to which the game tree is expanded
-def CuttingOffSearch():
-    return 1
 
 def IterativeDeepening():
     return 1
-
-def HeuristicContinuation():
-    return 1
-
 
 #------------------------------------------------------------------
 #Heuristics that limit the branching factor of the game tree
@@ -516,14 +419,27 @@ def MonteCarloTreeSearch():
 
 #montecarlo Helper
 def UCB1(node):
-    vi = #mean of utility nodes beneath this ones
-    N = # number of times parent node was visited
-    ni = #number of times child node was visited
+    vi = None #mean of utility nodes beneath this ones
+    N = None # number of times parent node was visited
+    ni = None #number of times child node was visited
     ucb = vi + 2*math.sqrt((np.log(N))/ni)
 
     return ucb
 
 #------------------------------------------------------------------
+
+
+#File helper functions
+#------------------------------------------------------------------
+
+##function to output file with the move of our agent
+#format: <groupname> <column> <row>
+def OutputFile(inputRow, inputCol):
+    f = open(paths.move_file, "w")
+    f.write("Sigmoid {} {}\n".format(inputCol, inputRow))
+    f.close
+
+    return f
 
 ##inputCol is the number associated with the column
 #that the agent gives which NumberToLetter translates
@@ -541,23 +457,8 @@ def LetterToNumber(inputColAsLetter):
     theNumber = ord(inputColAsLetter) - ord('@')
     return theNumber
 
-##function to output file with the move of our agent
-#format: <groupname> <column> <row>
-def OutputFile(inputRow, inputCol):
-    f = open("move_file", "w")
-    f.write("Sigmoid {} {}\n".format(inputCol, inputRow))
-    f.close
+#------------------------------------------------------------------
 
-    return f
-
-##getVector will take in two different points and find the vector associated with the two to create a
-#sense of direction to search for a potential continuation of connected stones
-def getVector(x2, x1, y2, y1):
-    xCoord = x2 - x1
-    yCoord = y2 - y1
-    orderedPair = Vector(x = xCoord, y = yCoord)
-
-    return orderedPair
-
+#Run the program
 if __name__ == '__main__':
     main()
