@@ -1,6 +1,7 @@
 from os import path
 from Board import Board, Vector, BoardConfiguration
 import ConfigsEnum, math, paths
+import numpy as np
 groupName = "Sigmoid"
 
 moveNum = 0 #The move number in the game
@@ -29,15 +30,14 @@ def PlayGame(board):
                 col = int(lines[2])
                 board.placePiece(row, col, 0, 2, moveNum) #makes opponent move
                 moveNum += 1
-                ######TODO This was not indented before, however I think it should be. I commmented this in case Im wrong and we get a bug
-                #make move here
-                board.currentGameState.boardList[0][0] = 1
-                board.currentGameState.boardList[1][1] = 1
-                print(str(PerformSpiral(board, 15, 15, 1)))
-                print("Turn "+str(moveNum)+" completed.")
-                moveNum += 1
-                input("Press any key to continue . . .")
-                PlayGame(board) #repeats until game completion
+            #make move here
+            board.currentGameState.boardList[0][0] = 1
+            board.currentGameState.boardList[1][1] = 1
+            print(str(PerformSpiral(board, 15, 15, 1)))
+            print("Turn "+str(moveNum)+" completed.")
+            moveNum += 1
+            input("Press any key to continue . . .")
+            PlayGame(board) #repeats until game completion
 
 #distance formula
 def getDistance(x2, x1, y2, y1):
@@ -491,6 +491,15 @@ def TaperedSearch():
 def MonteCarloTreeSearch():
 
     return 1
+
+#montecarlo Helper
+def UCB1(node):
+    vi = #mean of utility nodes beneath this ones
+    N = # number of times parent node was visited
+    ni = #number of times child node was visited
+    ucb = vi + 2*math.sqrt((np.log(N))/ni)
+
+    return ucb
 
 #------------------------------------------------------------------
 
