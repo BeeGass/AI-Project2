@@ -1,6 +1,6 @@
 from os import path
 from Board import Board, Vector, BoardConfiguration
-import ConfigsEnum, math, paths
+import math, paths
 import numpy as np
 groupName = "Sigmoid"
 moveNum = 0 #The move number in the game
