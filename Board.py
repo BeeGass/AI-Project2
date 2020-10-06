@@ -69,3 +69,14 @@ class MiniMaxNode:
         self.currentVal = currentVal
         self.currentMove = currentMove
         self.evalForNextMove = evalForNextMove
+
+#Enum representing the evaluation values for each path type for calcPathUtil
+class pathEvalValues(Enum):
+    FIVE = 10 #five in a row
+    #TODO fill values
+    LIVEFOUR = 0
+    DEADFOUR = 0
+    LIVETHREE = 0
+    DEADTHREE = 0
+    LIVETWO = 0
+    DEADTWO = 0
