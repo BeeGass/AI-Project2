@@ -50,14 +50,16 @@ def PlayGame(board):
 
 #Gets the optimal move using the minimax algorithm with alpha-beta pruning and performs the move
 #board: The current game board
-def makeMove(board: Board):
+def makeMove(board: BoardConfiguration):
     global moveNum
     global groupName
-    r = 0
-    c = 0
-    utility = 0
-    #TODO: implement actual r and c values
-    board.placePiece(0, 0, 0, 1, moveNum) #place piece on board
+    inputMove = Move(1, -1, -1, -1, board, moveNum) #dummy move value to use for minimax purposes
+    bestMove: Move
+    bestMove = MiniMax(inputMove, 0, 1)
+    row = bestMove.row
+    col = bestMove.col
+    utility = bestMove.utility
+    board.placePiece(row, col, utility, 1, moveNum) #place piece on board
     #write to the file here
     strToWrite = groupName + " " + NumberToLetter(r) + " " + str(c)
     f = open("move_file", "w") #open file to write over
