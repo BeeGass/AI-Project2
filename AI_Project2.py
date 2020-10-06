@@ -2,7 +2,6 @@ from os import path
 from Board import Board, Vector, BoardConfiguration
 import ConfigsEnum, math, paths
 groupName = "Sigmoid"
-
 moveNum = 0 #The move number in the game
 
 def main():
@@ -13,9 +12,9 @@ def main():
 #board: An array represetnation of the game board
 def PlayGame(board):
     global moveNum
-    #while not path.exists(groupName+".go"): #waits until it is the player's move
-    #   print("Waiting for other player. . ."
-    #   pass
+    print("Waiting for other player. . .")
+    while not path.exists(groupName+".go"): #waits until it is the player's move
+       pass
     if path.exists(paths.goFile):
         if path.exists(paths.endgame):
             #end of game
@@ -28,17 +27,15 @@ def PlayGame(board):
                 lines = f.split()
                 row = LetterToNumber(lines[1])
                 col = int(lines[2])
-                board.placePiece(row, col, 0, 2, moveNum) #makes opponent move
+                board.placePiece(row, col, -1, 2, moveNum) #makes opponent move
                 moveNum += 1
                 ######TODO This was not indented before, however I think it should be. I commmented this in case Im wrong and we get a bug
-                #make move here
-                board.currentGameState.boardList[0][0] = 1
-                board.currentGameState.boardList[1][1] = 1
-                print(str(PerformSpiral(board, 15, 15, 1)))
-                print("Turn "+str(moveNum)+" completed.")
-                moveNum += 1
-                input("Press any key to continue . . .")
-                PlayGame(board) #repeats until game completion
+                #UPDATE: lack of indentation was intentional
+            #make move here
+            makeMove(board)
+            print("Turn "+str(moveNum)+" completed.")
+            moveNum += 1
+            PlayGame(board) #repeats until game completion
 
 #distance formula
 def getDistance(x2, x1, y2, y1):
@@ -53,6 +50,22 @@ def getVector(x2, x1, y2, y1):
 
     return orderedPair
 #------------------------------------------------------------------
+
+#Gets the optimal move using the minimax algorithm with alpha-beta pruning and performs the move
+#board: The current game board
+def makeMove(board: Board):
+    global moveNum
+    global groupName
+    r = 0
+    c = 0
+    utility = 0
+    #TODO: implement actual r and c values
+    board.placePiece(r, c, 0, 1, moveNum) #place piece on board
+    #write to the file here
+    strToWrite = groupName + " " + NumberToLetter(r) + " " + str(c)
+    f = open("move_file", "w") #open file to write over
+    f.write(strToWrite) #write the inputted move
+    f.close()
 
 def isAdjacentCell():
     dist = getDistance()
@@ -302,7 +315,7 @@ def spiral(X, Y, listOfPreviousMoves, inputXBoard, inputXPlaceOnBoard, inputYPla
 
 
 ## genPossibleMoves will iterate through an entire board and find all possible moves that are within 2 spaces of any given piece
-def genPossibleMoves(inputMove, player):l
+def genPossibleMoves(inputMove, player):
 
     inputMove.moveXBoardConfig = inputXBoard
     theNumber = inputMove.moveNum + 1
