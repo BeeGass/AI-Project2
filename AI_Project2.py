@@ -11,31 +11,33 @@ def main():
 #Function which will play the Gomoku game until completion
 #board: An array represetnation of the game board
 def PlayGame(board):
+    #exit(0)
     global moveNum
     print("Waiting for other player. . .")
-    while not path.exists(groupName+".go"): #waits until it is the player's move
+    while not path.exists(paths.goFile): #waits until it is the player's move
        pass
-    if path.exists(paths.goFile):
-        if path.exists(paths.endgame):
-            #end of game
-            print("End of game")
-            exit(code=0)
-        else:
-            #read opponent's move here
-            if path.exists(paths.move_file):
-                f = open(paths.move_file).read()
-                lines = f.split()
+    if path.exists(paths.endgame):
+        #end of game
+        print("End of game")
+        exit(code=0)
+    else:
+        #read opponent's move here
+        if path.exists(paths.move_file):
+            print("Here")
+            f = open(paths.move_file).read()
+            lines = f.split()
+            if not lines == []:
                 row = LetterToNumber(lines[1])
                 col = int(lines[2])
                 board.placePiece(row, col, -1, 2, moveNum) #makes opponent move
                 moveNum += 1
                 ######TODO This was not indented before, however I think it should be. I commmented this in case Im wrong and we get a bug
                 #UPDATE: lack of indentation was intentional
-            #make move here
-            makeMove(board)
-            print("Turn "+str(moveNum)+" completed.")
-            moveNum += 1
-            PlayGame(board) #repeats until game completion
+        #make move here
+        makeMove(board)
+        print("Turn "+str(moveNum)+" completed.")
+        moveNum += 1
+        PlayGame(board) #repeats until game completion
 
 #distance formula
 def getDistance(x2, x1, y2, y1):
@@ -60,7 +62,7 @@ def makeMove(board: Board):
     c = 0
     utility = 0
     #TODO: implement actual r and c values
-    board.placePiece(r, c, 0, 1, moveNum) #place piece on board
+    board.placePiece(0, 0, 0, 1, moveNum) #place piece on board
     #write to the file here
     strToWrite = groupName + " " + NumberToLetter(r) + " " + str(c)
     f = open("move_file", "w") #open file to write over

@@ -340,5 +340,7 @@ ASALocalRun/
 healthchecksdb
 
 Eproject.py
-/RUN THIS COMMAND TO TEST PROGRAM.txt
-/Clear game files.bat
+move_file
+Human.go
+Sigmoid.go
+end_game

@@ -5,6 +5,7 @@ def main ():
     PlayGame()
 
 def PlayGame():
+    #exit(0)
     print("Waiting for other player. . .")
     while not path.exists(groupName+".go"): #waits until it is the player's move
        pass
