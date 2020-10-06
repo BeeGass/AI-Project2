@@ -32,7 +32,6 @@ def PlayGame(board):
                 col = int(lines[2])
                 board.placePiece(row, col, -1, 2, moveNum) #makes opponent move
                 moveNum += 1
-<<<<<<< HEAD
             #make move here
             board.currentGameState.boardList[0][0] = 1
             board.currentGameState.boardList[1][1] = 1
@@ -40,9 +39,6 @@ def PlayGame(board):
             print("Turn "+str(moveNum)+" completed.")
             moveNum += 1
             input("Press any key to continue . . .")
-=======
-                ######TODO This was not indented before, however I think it should be. I commmented this in case Im wrong and we get a bug
-                #UPDATE: lack of indentation was intentional
         #make move here
         makeMove(board)
         print("Turn "+str(moveNum)+" completed.")
