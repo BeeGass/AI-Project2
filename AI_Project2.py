@@ -1,6 +1,11 @@
 from os import path
+<<<<<<< HEAD
 from Board import Board, Vector, BoardConfiguration
 import ConfigsEnum, math, paths
+=======
+from Board import Board, Vector, BoardConfiguration, pathEvalValues
+import math, paths
+>>>>>>> a1014f4285040a888a81ef011be9dd4aef319a3d
 import numpy as np
 groupName = "Sigmoid"
 moveNum = 0 #The move number in the game
@@ -320,6 +325,10 @@ def localSpiral(X, Y, listOfPreviousMoves, inputXBoard, inputXPlaceOnBoard, inpu
     return ListOfPreviousPossibleMoves
 
 #Calculates the utility value for a given path
+#boardState: The board configuration
+#startPos: The vector indicating the path's starting location
+#dir: The direction of the path
+#player: The player to calculate the util for
 def calcPathUtil (boardState, startPos, dir, player):
     currentPos = Vector(startPos.x + dir.x, startPos.y + dir.y); #represents the current position in the search
     pathLength = 1 #represents the length of the path
@@ -345,7 +354,7 @@ def calcPathUtil (boardState, startPos, dir, player):
 
     currentPos = Vector(startPos.x - dir.x, startPos.y - dir.y); #begin search in other direction
 
-    #search in the positive direction
+    #search in the negative direction
     while currentPos.x > 0 and currentPos.y > 0 and pathLength < 5: #makes sure the coords are within the bounds of the board
         if boardState[currentPos.x][currentPos.y] == player:
             pathLength += 1 #add to the running total for the current direction
@@ -359,14 +368,27 @@ def calcPathUtil (boardState, startPos, dir, player):
                 break #break out of the for loop if >1 gap is found
         currentPos.x -= 1
         currentPos.y -= 1
-
-    if pathLength == 5:
-       return 10
+                    
+    #return the appropriate eval values based on the path
+     if pathLength == 5:
+       return pathEvalValues.FIVE
     if block == 2 and not gap: #if the path is obstructed on both sides and there is no gap in the middle, the position is worth nothing
         return 0
-    if pathLength == 2:
-        return 5
 
+    live: bool #indicates if the path is being evaluated as live or not
+    live = (gap and block < 2) or (!gap and block < 1)
+    #explanation:
+    #if there is a gap in the path, it can be blocked on at most 1 side and still be live
+    #if no gap exists, it can only be live if there is no block on either side   
+
+    if pathLength == 4:
+        return pathEvalValues.LIVEFOUR if live else pathEvalValues.DEADFOUR #ternary to check if the path is live or not
+    elif pathLength == 3:
+        return pathEvalValues.LIVETHREE if live else pathEvalValues.DEADTHREE
+    elif pathLength == 2:
+        return pathEvalValues.LIVETWO if live else pathEvalValues.DEADTWO
+    elif pathLength <= 1: #any path <= 1 in length is not worth anything
+        return 0
     return 0
 #------------------------------------------------------------------
 
