@@ -72,12 +72,17 @@ def makefirstMove(board: board):
 
 #Tree creation functions
 #------------------------------------------------------------------
+#initializes move into a node
+#input node
+#output MinimaxNode
 def MakeStartingNode(inputStartingMove: Move):
     theMove = inputStartingMove
     firstNode = MiniMaxNode(parent = None, children = None, currentVal = theMove.utility, currentMove = theMove)
 
     return firstNode
 
+#Creates the tree for minimax algorithm to running
+#input starting move, depthlimit
 def CreateTree(inputStartingNode: MiniMaxNode, depthLimit: int):
     rootNode = firstNode = MiniMaxNode(parent = None, children = None, currentVal = inputStartingNode.currentVal, currentMove = inputStartingNode.currentMove)
     rootNode.children = CreateChildren(rootNode.currentMove, depthLimit, 0)
