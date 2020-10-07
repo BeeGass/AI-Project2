@@ -1,4 +1,9 @@
 from os import path
+<<<<<<< HEAD
+=======
+from Board import Board, Vector, BoardConfiguration
+import ConfigsEnum, math, paths
+>>>>>>> e1efda0b2f1fcb9fa1bd6a830480114b797379ee
 from Board import Board, Vector, BoardConfiguration, pathEvalValues
 import math, paths
 import numpy as np
@@ -87,19 +92,19 @@ def makefirstMove(board: board):
 
 #Tree creation functions
 #------------------------------------------------------------------
-def MakeStartingNode(inputStartingMove):
+def MakeStartingNode(inputStartingMove: Move):
     theMove = inputStartingMove
     firstNode = MiniMaxNode(parent = None, children = None, currentVal = theMove.utility, currentMove = theMove)
 
     return firstNode
 
-def CreateTree(inputStartingMove, depthLimit):
+def CreateTree(Move: inputStartingMove, int: depthLimit):
     rootNode = firstNode = MiniMaxNode(parent = None, children = None, currentVal = inputStartingMove.utility, currentMove = inputStartingNode)
     rootNode.children = CreateChildren(rootNode.currentMove, depthLimit, 0)
 
     return rootNode
 
-def CreateChildren(prevMove, depthLimit, currentDepth):
+def CreateChildren(prevMove: Move, depthLimit: int, currentDepth: int):
     children = []
     currentTurn = currentDepth % 2 + 1
     childMoves = genPossibleMoves(prevMove, currentDepth % 2 + 1)
@@ -115,7 +120,7 @@ def CreateChildren(prevMove, depthLimit, currentDepth):
     return children
 
 ## genPossibleMoves will iterate through an entire board and find all possible moves that are within 2 spaces of any given piece
-def genPossibleMoves(inputMove, player):
+def genPossibleMoves(inputMove: Move, player: int):
 
     inputMove.moveXBoardConfig = inputXBoard
     theNumber = inputMove.moveNum + 1
@@ -151,14 +156,14 @@ def genPossibleMoves(inputMove, player):
 #Math helper functions
 #------------------------------------------------------------------
 #distance formula
-def getDistance(x2, x1, y2, y1):
+def getDistance(x2: int, x1: int, y2: int, y1: int):
     dist = math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2))
 
     return dist
 
 ##getVector will take in two different points and find the vector associated with the two to create a
 #sense of direction to search for a potential continuation of connected stones
-def getVector(x2, x1, y2, y1):
+def getVector(x2: int, x1: int, y2: int, y1: int):
     xCoord = x2 - x1
     yCoord = y2 - y1
     orderedPair = Vector(x = xCoord, y = yCoord)
@@ -168,7 +173,7 @@ def getVector(x2, x1, y2, y1):
 
 #Board evaluation functions
 #------------------------------------------------------------------
-def BoardEval(board, inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
+def BoardEval(board: Board, inputBoardDimensionX: int, inputBoardDimensionY: int, inputPlayerTurn: int):
     X = inputBoardDimensionX
     Y = inputBoardDimensionY
     turn = inputPlayerTurn
@@ -202,7 +207,6 @@ def BoardEval(board, inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn
             spot = boardConfig.currentGameState.boardList[x][y]
 
             if spot != 0:
-
                 if not stoneArrForSelf:
                     stoneArrForSelf = location
                 elif stoneArrForSelf:
@@ -262,7 +266,7 @@ def BoardEval(board, inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn
 #   +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+                           +---+---+---+---+---+
 #                                                                                        2  |21↑|20←|19←|18←|17←|
 #                                                                                           +---+---+---+---+---+
-def localSpiral(X, Y, listOfPreviousMoves, inputXBoard, inputXPlaceOnBoard, inputYPlaceOnBoard):
+def localSpiral(X: int, Y: int, listOfPreviousMoves: list, inputXBoard: Board, inputXPlaceOnBoard: int, inputYPlaceOnBoard: int):
 
     # trueX and trueY are the x and y values associated with the real game board
     #this is because it can be thought of that spiral() analyzes a the game board a zoomed in manner
@@ -315,7 +319,7 @@ def localSpiral(X, Y, listOfPreviousMoves, inputXBoard, inputXPlaceOnBoard, inpu
 #startPos: The vector indicating the path's starting location
 #dir: The direction of the path
 #player: The player to calculate the util for
-def calcPathUtil (boardState, startPos, dir, player):
+def calcPathUtil (Board: boardState, startPos: Vector, dir: Vector, player: int):
     currentPos = Vector(startPos.x + dir.x, startPos.y + dir.y); #represents the current position in the search
     pathLength = 1 #represents the length of the path
     block = 0 #0 if path is not obstructed on either side, 1 if obstructed on 1 side, 2 if obstructed on both sides
@@ -356,13 +360,13 @@ def calcPathUtil (boardState, startPos, dir, player):
         currentPos.y -= 1
 
     #return the appropriate eval values based on the path
-     if pathLength == 5:
+    if pathLength == 5:
        return pathEvalValues.FIVE
     if block == 2 and not gap: #if the path is obstructed on both sides and there is no gap in the middle, the position is worth nothing
         return 0
 
     live: bool #indicates if the path is being evaluated as live or not
-    live = (gap and block < 2) or (!gap and block < 1)
+    live = (gap and block < 2) or (not gap and block < 1)
     #explanation:
     #if there is a gap in the path, it can be blocked on at most 1 side and still be live
     #if no gap exists, it can only be live if there is no block on either side
@@ -376,6 +380,20 @@ def calcPathUtil (boardState, startPos, dir, player):
     elif pathLength <= 1: #any path <= 1 in length is not worth anything
         return 0
     return 0
+
+def IsGameOver(inputBoardState: Board, inputCurrentpathEvalValues: pathEvalValues):
+    theGame =  inputBoardState.currentGameState
+    pointState = inputBoardState.utility
+    gameOver = None
+    currentPointVals = inputCurrentpathEvalValues
+
+    if pointState <= 0:
+        gameOver = False
+
+    if currentPointVals.FIVE == someValueRepresentingEvalAssociatedWithWinning: #input value here that represents when we win 
+        gameOver = True
+
+    return gameOver
 #------------------------------------------------------------------
 
 #Algorithms
@@ -495,7 +513,7 @@ def UCB1(node):
 
 ##function to output file with the move of our agent
 #format: <groupname> <column> <row>
-def OutputFile(inputRow, inputCol):
+def OutputFile(inputRow: chr, inputCol: int):
     f = open(paths.move_file, "w")
     f.write("Sigmoid {} {}\n".format(inputCol, inputRow))
     f.close
@@ -508,13 +526,13 @@ def OutputFile(inputRow, inputCol):
 #example: 1->A
 #         2->B
 #         3->C
-def NumberToLetter(inputColAsNumber):
+def NumberToLetter(inputColAsNumber: int):
     theLetter = chr(ord('@') + inputColAsNumber)
     return theLetter
 
 ##The opposite of NumberToLetter. It takes in a letter and converts it
 #into a number
-def LetterToNumber(inputColAsLetter):
+def LetterToNumber(inputColAsLetter: chr):
     theNumber = ord(inputColAsLetter) - ord('@')
     return theNumber
 
