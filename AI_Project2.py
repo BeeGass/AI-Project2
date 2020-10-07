@@ -58,7 +58,7 @@ def makeMove(board : Board):
     rootNode = CreateTree(board.currentGameState, 10)
 
     #The minimax and final choice conclusion
-    theMove =  MinimaxABprune(depth, nodeIndex, maximizingPlayer, values, 10).currentMove #should produce inputRow and inputCol
+    theMove =  AlphaBetaPruning(board, 1, 10, math.INF, math.INF)
     #the submission spinoff
     board.placePiece(theMove.row, theMove.col, theMove.utility, 1, moveNum)
     OutputFile(theMove.row, theMove.col)
@@ -416,7 +416,7 @@ def AlphaBetaPruning(inputBoard: Board, inputPlayerTurn: int, inputDepth: int, i
     gameOver = IsGameOver(inputBoard, eval)
 
     alpha = inputAlpha
-    beta = inputBeta
+    beta = -inputBeta
 
     if inputDepth == 0 or gameOver:
         positionEval = BoardEval(inputBoard, inputPlayerTurn)
