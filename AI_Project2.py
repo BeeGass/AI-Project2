@@ -1,3 +1,4 @@
+from PIL import Image #this is meme, dont kill me pls
 from os import path
 import math, paths
 from Board import Board, Vector, BoardConfiguration, pathEvalValues, Move, MiniMaxNode
@@ -5,6 +6,7 @@ import math, paths
 #import numpy as np
 groupName = "Sigmoid"
 moveNum = 0 #The move number in the game
+decisionTree: MiniMaxNode #the decision tree for Minimax
 
 #Base game functions
 #------------------------------------------------------------------
@@ -23,6 +25,8 @@ def PlayGame(board):
     if path.exists(paths.endgame):
         #end of game
         print("End of game")
+        im = Image.open('img.jpg') #this is meme, dont kill me pls
+        im.show('image',im) #this is meme, dont kill me pls
         exit(code=0)
     else:
         #read opponent's move here
@@ -49,15 +53,13 @@ def makeMove(board : Board):
     #first move shit that im not sure of. Pseudo code
     if moveNum == 0 or moveNum == 1:
         startingMove = makefirstMove(board) #TODO create me father
+        OutputFile(7, 7)
         #MakeStartingNode(startingMove) #TODO god left me unfinished
         pass
     #########
 
-    #Tree birth: Origins Part 1, the start
-    #rootNode = CreateTree(board.currentGameState, 10)
-
-    #The minimax and final choice conclusion
-    theMove =  AlphaBetaPruning(board, 1, 10, math.INF, math.INF)
+    #Minimax doing its thing bruv
+    theMove = MiniMaxConAlphaBetaPruning(board, inputPlayerTurn: int, 0, math.INF, -math.INF, Move)
     #the submission spinoff
     board.placePiece(theMove.row, theMove.col, theMove.utility, 1, moveNum)
     OutputFile(theMove.row, theMove.col)
@@ -382,47 +384,14 @@ def IsGameOver(inputBoardState: Board, inputCurrentpathEvalValues: pathEvalValue
 
 #Algorithms
 #------------------------------------------------------------------
-#ripped from geek4geeks, returns a single value tho, worth a look
-def MinimaxABprune(node, depth, nodeIndex, maximizingPlayer, values, depthLimit):
-    alpha = math.INF
-    beta = -math.INF
-    # Terminating condition. i.e
-    # leaf node is reached
-    if depth == 3:
-        return values[nodeIndex]
-    if maximizingPlayer:
-        best = MIN
-        # Recur for left and right children
-        for i in range(0, 2):
-            val = MinimaxABprune(depth + 1, nodeIndex * 2 + i, False, values, alpha, beta)
-            best = max(best, val)
-            alpha = max(alpha, best)
-            # Alpha Beta Pruning
-            if beta <= alpha:
-                break
-        return best
-    else:
-        best = MAX
-        # Recur for left and
-        # right children
-        for i in range(0, 2):
-            val = MinimaxABprune(depth + 1, nodeIndex * 2 + i, True, values, alpha, beta)
-            best = min(best, val)
-            beta = min(beta, best)
-            # Alpha Beta Pruning
-            if beta <= alpha:
-                break
-
-        return best
-
 def MiniMaxConAlphaBetaPruning(inputBoard: Board, inputPlayerTurn: int, inputDepth: int, inputAlpha, inputBeta, inputMove: Move):
     gameOver = IsGameOver(inputBoard, eval) #TODO: implement that beh
     alpha = inputAlpha
     beta = -inputBeta
     infinity = math.inf
-    negInfinity = -math.inf 
+    negInfinity = -math.inf
 
-    if inputMove.moveNum == 0:
+    if moveNum == 0 or moveNum == 1
         startingNode = MakeStartingNode(inputMove)
         CreateTree(startingNode, inputDepth)
 
@@ -443,7 +412,7 @@ def MiniMaxConAlphaBetaPruning(inputBoard: Board, inputPlayerTurn: int, inputDep
 
         return maxEval
     else:
-        minEval = inifinity 
+        minEval = inifinity
 
         for child in startingNode.children:
             aNode = Minimax(child, inputDepth - 1, alpha, beta, True)
