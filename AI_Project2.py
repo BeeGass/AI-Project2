@@ -1,7 +1,6 @@
 from os import path
-from Board import Board, Vector, BoardConfiguration
-import ConfigsEnum, math, paths
-from Board import Board, Vector, BoardConfiguration, pathEvalValues
+import math, paths
+from Board import Board, Vector, BoardConfiguration, pathEvalValues, Move, MiniMaxNode
 import math, paths
 import numpy as np
 groupName = "Sigmoid"
@@ -48,7 +47,7 @@ def makeMove(board : Board):
     global moveNum
     ##########
     #first move shit that im not sure of. Pseudo code
-    if moveNum is 0 or 1:
+    if moveNum == 0 or moveNum == 1:
         startingMove = makefirstMove(board) #TODO create me father
         #MakeStartingNode(startingMove) #TODO god left me unfinished
         pass
@@ -63,7 +62,7 @@ def makeMove(board : Board):
     board.placePiece(theMove.row, theMove.col, theMove.utility, 1, moveNum)
     OutputFile(theMove.row, theMove.col)
 
-def makefirstMove(board: board):
+def makefirstMove(board: Board):
     # if moveNum is 0:
     board.placePiece(7, 7, -1, 1, moveNum) #TODO how do i get the utility for the first move and why is this stored
     # else:
@@ -305,7 +304,7 @@ def localSpiral(X: int, Y: int, listOfPreviousMoves: list, inputXBoard: Board, i
 #startPos: The vector indicating the path's starting location
 #dir: The direction of the path
 #player: The player to calculate the util for
-def calcPathUtil (Board: boardState, startPos: Vector, dir: Vector, player: int):
+def calcPathUtil (Board: BoardConfiguration, startPos: Vector, dir: Vector, player: int):
     currentPos = Vector(startPos.x + dir.x, startPos.y + dir.y); #represents the current position in the search
     pathLength = 1 #represents the length of the path
     block = 0 #0 if path is not obstructed on either side, 1 if obstructed on 1 side, 2 if obstructed on both sides
@@ -417,10 +416,12 @@ def MinimaxABprune(node, depth, nodeIndex, maximizingPlayer, values, depthLimit)
 
         return best
 
-def AlphaBetaPruning(inputBoard: Board, inputPlayerTurn: int, inputDepth: int, inputAlpha: infinity, inputBeta: infinity, inputMove: Move):
-    gameOver = IsGameOver(inputBoard, eval)
+def MiniMaxConAlphaBetaPruning(inputBoard: Board, inputPlayerTurn: int, inputDepth: int, inputAlpha, inputBeta, inputMove: Move):
+    gameOver = IsGameOver(inputBoard, eval) #TODO: implement that beh
     alpha = inputAlpha
     beta = -inputBeta
+    infinity = math.inf
+    negInfinity = -math.inf 
 
     if inputMove.moveNum == 0:
         startingNode = MakeStartingNode(inputMove)
@@ -430,26 +431,30 @@ def AlphaBetaPruning(inputBoard: Board, inputPlayerTurn: int, inputDepth: int, i
         positionEval = BoardEval(inputBoard, inputPlayerTurn)
         return positionEval
 
-    if inputMaximizingPlayer:
-        for child in startingNode:
-            eval = Minimax(child, inputDepth - 1, alpha, beta, False)
-            maxEval = max(maxEval, eval)
+    if inputPlayerTurn:
+        maxEval = negInfinity
 
-            alpha = max(alpha, eval)
+        for child in startingNode.children:
+            aNode = Minimax(child, inputDepth - 1, alpha, beta, False)
+            maxEval = max(maxEval, aNode.currentVal)
+
+            alpha = max(alpha, aNode.currentVal)
             if beta <= alpha:
                 break
 
-            return maxEval
+        return maxEval
     else:
-        for child in startingNode:
-            eval = Minimax(child, inputDepth - 1, alpha, beta, True)
-            minEval = min(minEval, eval)
+        minEval = inifinity 
 
-            beta = min(beta, eval)
+        for child in startingNode.children:
+            aNode = Minimax(child, inputDepth - 1, alpha, beta, True)
+            minEval = min(minEval, aNode.currentVal)
+
+            beta = min(beta, aNode.currentVal)
             if beta <= alpha:
                 break
 
-            return minEval
+        return minEval
 #------------------------------------------------------------------
 
 #------------------------------------------------------------------

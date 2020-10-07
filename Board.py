@@ -1,3 +1,5 @@
+from enum import Enum
+
 #Class representing a possible board state
 class BoardConfiguration:
     boardSize = 15
@@ -56,7 +58,7 @@ class Vector:
 
 
 class MiniMaxNode:
-    parent : MiniMaxNode #collection of arbitrary moves to current aribitrary point
+    parent : 'MiniMaxNode' #collection of arbitrary moves to current aribitrary point
     children: list #collection of arbitrary moves representing arbitrary amount of children
     currentVal: int #the metric for utility
     currentMove: Move #the move so as to reference the board state later on
