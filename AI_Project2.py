@@ -44,7 +44,7 @@ def PlayGame(board):
 
 #Gets the optimal move using the minimax algorithm with alpha-beta pruning and performs the move
 #board: The current game board
-def makeMoveV2(board : Board):
+def makeMove(board : Board):
     global moveNum
     ##########
     #first move shit that im not sure of. Pseudo code
@@ -57,28 +57,11 @@ def makeMoveV2(board : Board):
     #Tree birth: Origins Part 1, the start
     rootNode = CreateTree(board.currentGameState, 10)
 
-    #the tree opitimization Saga
-    BoardEval(board, inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn) #TODO is inputPlayerTurn pointless? We are never going to get to run this on an active enemy turn because of the while loop checking for the .go file
-    inputMove, inputDepth = AlphaBetaPruning(inputMove, inputDepth, inputAlpha, inputBeta, inputMaximizingPlayer)
-
     #The minimax and final choice conclusion
-    inputRow, inputCol = MiniMax(inputMove, inputDepth, inputMaximizingPlayer) #should produce inputRow and inputCol
+    theMove =  MinimaxABprune(depth, nodeIndex, maximizingPlayer, values, 10).currentMove #should produce inputRow and inputCol
     #the submission spinoff
-    OutputFile(inputRow, inputCol)
-
-def makeMove(board: Board):
-    global moveNum
-    global groupName
-    r = 0
-    c = 0
-    utility = 0
-    #TODO: implement actual r and c values
-    board.placePiece(0, 0, 0, 1, moveNum) #place piece on board
-    #write to the file here
-    strToWrite = groupName + " " + NumberToLetter(r) + " " + str(c)
-    f = open("move_file", "w") #open file to write over
-    f.write(strToWrite) #write the inputted move
-    f.close()
+    board.placePiece(theMove.row, theMove.col, theMove.utility, 1, moveNum)
+    OutputFile(theMove.row, theMove.col)
 
 def makefirstMove(board: board):
     # if moveNum is 0:
@@ -388,7 +371,7 @@ def IsGameOver(inputBoardState: Board, inputCurrentpathEvalValues: pathEvalValue
     if pointState <= 0:
         gameOver = False
 
-    if currentPointVals.FIVE == someValueRepresentingEvalAssociatedWithWinning: #input value here that represents when we win 
+    if currentPointVals.FIVE == someValueRepresentingEvalAssociatedWithWinning: #input value here that represents when we win
         gameOver = True
 
     return gameOver
@@ -397,10 +380,9 @@ def IsGameOver(inputBoardState: Board, inputCurrentpathEvalValues: pathEvalValue
 #Algorithms
 #------------------------------------------------------------------
 #ripped from geek4geeks, returns a single value tho, worth a look
-def MinimaxABprune(depth, nodeIndex, maximizingPlayer, values):
-    alpha = math.inf
-    beta = -math.inf
-
+def MinimaxABprune(node, depth, nodeIndex, maximizingPlayer, values, depthLimit):
+    alpha = math.INF
+    beta = -math.INF
     # Terminating condition. i.e
     # leaf node is reached
     if depth == 3:
