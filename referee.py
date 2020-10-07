@@ -352,7 +352,7 @@ def play_gomoku(team1, team2):
 
             removeTeamGoFile(up_to_play)
 
-            if move.team_name != up_to_play:
+            if move.team_name != None and move.team_name != up_to_play:
                 # Note: this section may need to be taken with a grain of salt
                 logging.error("Wait your turn!")
                 win_team = up_to_play
