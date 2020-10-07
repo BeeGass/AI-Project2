@@ -1,6 +1,9 @@
 from os import path
+<<<<<<< HEAD
+=======
 from Board import Board, Vector, BoardConfiguration
 import ConfigsEnum, math, paths
+>>>>>>> e1efda0b2f1fcb9fa1bd6a830480114b797379ee
 from Board import Board, Vector, BoardConfiguration, pathEvalValues
 import math, paths
 import numpy as np
@@ -19,7 +22,6 @@ def main():
 def PlayGame(board):
     #exit(0)
     global moveNum
-    print("Waiting for other player. . .")
     while not path.exists(paths.goFile): #waits until it is the player's move
         pass
     if path.exists(paths.endgame):
@@ -32,23 +34,16 @@ def PlayGame(board):
             print("Here")
             f = open(paths.move_file).read()
             lines = f.split()
+            moveNum += 1
             if not lines == []:
                 row = LetterToNumber(lines[1])
                 col = int(lines[2])
                 board.placePiece(row, col, -1, 2, moveNum) #makes opponent move
-                moveNum += 1
-            #make move here
-            board.currentGameState.boardList[0][0] = 1
-            board.currentGameState.boardList[1][1] = 1
-            print(str(BoardEval(board, 15, 15, 1)))#TODO same as comment on line 44
-            print("Turn "+str(moveNum)+" completed.")#TODO same as comment on line 44
-            moveNum += 1 #TODO why are we adding moveNum here again, we already did one time above for the enemy turn
-            input("Press any key to continue . . .") #TODO we should probably get rid of this, the 10 second counter starts the moment the referee makes the new file for us, plus running headless will make it faster
-        #make move here
-        makeMove(board)
-        print("Turn "+str(moveNum)+" completed.")
-        moveNum += 1
-        PlayGame(board) #repeats until game completion
+    #make move here
+    makeMove(board)
+    print("Turn "+str(moveNum)+" completed.")
+    moveNum += 1
+    PlayGame(board) #repeats until game completion
 
 #Gets the optimal move using the minimax algorithm with alpha-beta pruning and performs the move
 #board: The current game board
@@ -63,8 +58,7 @@ def makeMoveV2(board : Board):
     #########
 
     #Tree birth: Origins Part 1, the start
-    localSpiral(X, Y, listOfPreviousMoves, inputXBoard, inputXPlaceOnBoard, inputYPlaceOnBoard)
-    CreateTree(board.currentGameState, depthLimit) #TODO what is the purpose of depthLimit
+    rootNode = CreateTree(board.currentGameState, 10)
 
     #the tree opitimization Saga
     BoardEval(board, inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn) #TODO is inputPlayerTurn pointless? We are never going to get to run this on an active enemy turn because of the while loop checking for the .go file
@@ -90,10 +84,10 @@ def makeMove(board: Board):
     f.close()
 
 def makefirstMove(board: board):
-    if moveNum is 0:
-        board.placePiece(7, 7, utility, 1, moveNum) #TODO how do i get the utility for the first move and why is this stored
-    else:
-        board.placePiece() #TODO place on top of enemy move if its a good move
+    # if moveNum is 0:
+    board.placePiece(7, 7, -1, 1, moveNum) #TODO how do i get the utility for the first move and why is this stored
+    # else:
+        # board.placePiece() #TODO place on top of enemy move if its a good m11
 #------------------------------------------------------------------
 
 #Tree creation functions
@@ -364,7 +358,7 @@ def calcPathUtil (Board: boardState, startPos: Vector, dir: Vector, player: int)
                 break #break out of the for loop if >1 gap is found
         currentPos.x -= 1
         currentPos.y -= 1
-                    
+
     #return the appropriate eval values based on the path
     if pathLength == 5:
        return pathEvalValues.FIVE
@@ -375,7 +369,7 @@ def calcPathUtil (Board: boardState, startPos: Vector, dir: Vector, player: int)
     live = (gap and block < 2) or (not gap and block < 1)
     #explanation:
     #if there is a gap in the path, it can be blocked on at most 1 side and still be live
-    #if no gap exists, it can only be live if there is no block on either side   
+    #if no gap exists, it can only be live if there is no block on either side
 
     if pathLength == 4:
         return pathEvalValues.LIVEFOUR if live else pathEvalValues.DEADFOUR #ternary to check if the path is live or not
@@ -402,8 +396,6 @@ def IsGameOver(inputBoardState: Board, inputCurrentpathEvalValues: pathEvalValue
     return gameOver
 #------------------------------------------------------------------
 
-
-
 #Algorithms
 #------------------------------------------------------------------
 #TODO add list of moves
@@ -429,7 +421,9 @@ def MiniMax(inputMove, inputDepth, inputMaximizingPlayer, inputGameOver):
             return minEval
 
 #ripped from geek4geeks, returns a single value tho, worth a look
-def MinimaxABprune(depth, nodeIndex, maximizingPlayer, values, alpha, beta):
+def MinimaxABprune(depth, nodeIndex, maximizingPlayer, values):
+    alpha = math.inf
+    beta = -math.inf
     # Terminating condition. i.e
     # leaf node is reached
     if depth == 3:
@@ -483,8 +477,6 @@ def AlphaBetaPruning(inputMove, inputDepth, inputAlpha, inputBeta, inputMaximizi
                 break
             return minEval
 #------------------------------------------------------------------
-
-
 
 #------------------------------------------------------------------
 #Heuristics that limit the depth to which the game tree is expanded
