@@ -392,6 +392,31 @@ def IsGameOver(inputBoardState: Board, inputCurrentpathEvalValues: pathEvalValue
 
 #Algorithms
 #------------------------------------------------------------------
+<<<<<<< HEAD
+=======
+#TODO add list of moves
+def MiniMax(inputMove, inputDepth, inputMaximizingPlayer, inputGameOver):
+    #if the input depth is met or the game is over out put the evaluation of how good the move last made was
+    gameOver = inputGameOver
+    if inputDepth == 0 or gameOver:
+        positionEval = calcPathUtil()
+        return positionEval #nodes associated with evals
+
+    if inputMaximizingPlayer: #this is a boolean value
+        maxEval = -math.INF
+
+        for child in inputMove:
+            eval = MiniMax(child, inputDepth - 1, false)
+            maxEval = max(maxEval, eval)
+            return maxEval
+    else:
+        minEval = math.inf
+        for child in inputMove:
+            eval = MiniMax(child, depth - 1, true)
+            minEval = min(minEval, eval)
+            return minEval
+
+>>>>>>> f3f781bbfc7226ddb275a6e3ebed29fc1a5aeb12
 #ripped from geek4geeks, returns a single value tho, worth a look
 def MinimaxABprune(node, depth, nodeIndex, maximizingPlayer, values, depthLimit):
     alpha = math.INF
