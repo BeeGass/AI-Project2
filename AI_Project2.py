@@ -2,7 +2,7 @@ from os import path
 import math, paths
 from Board import Board, Vector, BoardConfiguration, pathEvalValues, Move, MiniMaxNode
 import math, paths
-import numpy as np
+#import numpy as np
 groupName = "Sigmoid"
 moveNum = 0 #The move number in the game
 
@@ -54,7 +54,7 @@ def makeMove(board : Board):
     #########
 
     #Tree birth: Origins Part 1, the start
-    rootNode = CreateTree(board.currentGameState, 10)
+    #rootNode = CreateTree(board.currentGameState, 10)
 
     #The minimax and final choice conclusion
     theMove =  AlphaBetaPruning(board, 1, 10, math.INF, math.INF)
@@ -83,8 +83,7 @@ def MakeStartingNode(inputStartingMove: Move):
 #Creates the tree for minimax algorithm to running
 #input starting move, depthlimit
 def CreateTree(inputStartingNode: MiniMaxNode, depthLimit: int):
-    rootNode = firstNode = MiniMaxNode(parent = None, children = None, currentVal = inputStartingNode.currentVal, currentMove = inputStartingNode.currentMove)
-    rootNode.children = CreateChildren(rootNode.currentMove, depthLimit, 0)
+    rootNode.children = CreateChildren(inputStartingNode.currentMove, depthLimit, 0)
 
     return rootNode
 
@@ -477,6 +476,7 @@ def MonteCarloTreeSearch():
 
     return 1
 
+"""
 #montecarlo Helper
 def UCB1(node):
     vi = None #mean of utility nodes beneath this ones
@@ -485,7 +485,7 @@ def UCB1(node):
     ucb = vi + 2*math.sqrt((np.log(N))/ni)
 
     return ucb
-
+"""
 #------------------------------------------------------------------
 
 #File helper functions
