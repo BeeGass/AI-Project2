@@ -36,7 +36,6 @@ class Move: #class representing a move made by either player
     utility: float #the utility represented by the move
     moveXBoardConfig : BoardConfiguration #the board configuration after the move has been made
     moveNum: int #the move number in the game
-    firstToMove: bool #true if firstToMove is home team, false if opposing player
 
     def __init__(self, player, row, col, utility, board, moveNum):
         self.player = player

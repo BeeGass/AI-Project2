@@ -386,6 +386,20 @@ def calcPathUtil (Board: boardState, startPos: Vector, dir: Vector, player: int)
     elif pathLength <= 1: #any path <= 1 in length is not worth anything
         return 0
     return 0
+
+def IsGameOver(inputBoardState: Board, inputCurrentpathEvalValues: pathEvalValues):
+    theGame =  inputBoardState.currentGameState
+    pointState = inputBoardState.utility
+    gameOver = None
+    currentPointVals = inputCurrentpathEvalValues
+
+    if pointState <= 0:
+        gameOver = False
+
+    if currentPointVals.FIVE == someValueRepresentingEvalAssociatedWithWinning: #input value here that represents when we win 
+        gameOver = True
+
+    return gameOver
 #------------------------------------------------------------------
 
 
