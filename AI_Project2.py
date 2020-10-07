@@ -44,7 +44,7 @@ def PlayGame(board):
 
 #Gets the optimal move using the minimax algorithm with alpha-beta pruning and performs the move
 #board: The current game board
-def makeMoveV2(board : Board):
+def makeMove(board : Board):
     global moveNum
     ##########
     #first move shit that im not sure of. Pseudo code
@@ -62,20 +62,6 @@ def makeMoveV2(board : Board):
     #the submission spinoff
     board.placePiece(theMove.row, theMove.col, theMove.utility, 1, moveNum)
     OutputFile(theMove.row, theMove.col)
-
-def makeMove(board: Board):
-    global moveNum
-    global groupName
-    r = 0
-    c = 0
-    utility = 0
-    #TODO: implement actual r and c values
-    board.placePiece(0, 0, 0, 1, moveNum) #place piece on board
-    #write to the file here
-    strToWrite = groupName + " " + NumberToLetter(r) + " " + str(c)
-    f = open("move_file", "w") #open file to write over
-    f.write(strToWrite) #write the inputted move
-    f.close()
 
 def makefirstMove(board: board):
     # if moveNum is 0:
@@ -392,8 +378,6 @@ def IsGameOver(inputBoardState: Board, inputCurrentpathEvalValues: pathEvalValue
 
 #Algorithms
 #------------------------------------------------------------------
-<<<<<<< HEAD
-=======
 #TODO add list of moves
 def MiniMax(inputMove, inputDepth, inputMaximizingPlayer, inputGameOver):
     #if the input depth is met or the game is over out put the evaluation of how good the move last made was
@@ -416,7 +400,6 @@ def MiniMax(inputMove, inputDepth, inputMaximizingPlayer, inputGameOver):
             minEval = min(minEval, eval)
             return minEval
 
->>>>>>> f3f781bbfc7226ddb275a6e3ebed29fc1a5aeb12
 #ripped from geek4geeks, returns a single value tho, worth a look
 def MinimaxABprune(node, depth, nodeIndex, maximizingPlayer, values, depthLimit):
     alpha = math.INF
