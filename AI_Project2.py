@@ -1,9 +1,6 @@
 from os import path
-<<<<<<< HEAD
-=======
 from Board import Board, Vector, BoardConfiguration
 import ConfigsEnum, math, paths
->>>>>>> e1efda0b2f1fcb9fa1bd6a830480114b797379ee
 from Board import Board, Vector, BoardConfiguration, pathEvalValues
 import math, paths
 import numpy as np
@@ -60,14 +57,11 @@ def makeMoveV2(board : Board):
     #Tree birth: Origins Part 1, the start
     rootNode = CreateTree(board.currentGameState, 10)
 
-    #the tree opitimization Saga
-    BoardEval(board, inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn) #TODO is inputPlayerTurn pointless? We are never going to get to run this on an active enemy turn because of the while loop checking for the .go file
-    inputMove, inputDepth = AlphaBetaPruning(inputMove, inputDepth, inputAlpha, inputBeta, inputMaximizingPlayer)
-
     #The minimax and final choice conclusion
-    inputRow, inputCol = MiniMax(inputMove, inputDepth, inputMaximizingPlayer) #should produce inputRow and inputCol
+    theMove =  MinimaxABprune(depth, nodeIndex, maximizingPlayer, values, 10).currentMove #should produce inputRow and inputCol
     #the submission spinoff
-    OutputFile(inputRow, inputCol)
+    board.placePiece(theMove.row, theMove.col, theMove.utility, 1, moveNum)
+    OutputFile(theMove.row, theMove.col)
 
 def makeMove(board: Board):
     global moveNum
@@ -390,7 +384,7 @@ def IsGameOver(inputBoardState: Board, inputCurrentpathEvalValues: pathEvalValue
     if pointState <= 0:
         gameOver = False
 
-    if currentPointVals.FIVE == someValueRepresentingEvalAssociatedWithWinning: #input value here that represents when we win 
+    if currentPointVals.FIVE == someValueRepresentingEvalAssociatedWithWinning: #input value here that represents when we win
         gameOver = True
 
     return gameOver
@@ -398,31 +392,10 @@ def IsGameOver(inputBoardState: Board, inputCurrentpathEvalValues: pathEvalValue
 
 #Algorithms
 #------------------------------------------------------------------
-#TODO add list of moves
-def MiniMax(inputMove, inputDepth, inputMaximizingPlayer):
-    #if the input depth is met or the game is over out put the evaluation of how good the move last made was
-    if inputDepth == 0 or gameOver:
-        positionEval = CalculateSelfUtility()
-        return positionEval #nodes associated with evals
-
-    if inputMaximizingPlayer: #this is a boolean value
-        maxEval = -math.INF
-
-        for child in inputMove:
-            eval = MiniMax(child, inputDepth - 1, false)
-            maxEval = max(maxEval, eval)
-            return maxEval
-    else:
-        minEval = math.inf
-        for child in inputMove:
-            eval = MiniMax(child, depth - 1, true)
-            minEval = min(minEval, eval)
-            return minEval
-
 #ripped from geek4geeks, returns a single value tho, worth a look
-def MinimaxABprune(depth, nodeIndex, maximizingPlayer, values):
-    alpha = math.inf
-    beta = -math.inf
+def MinimaxABprune(node, depth, nodeIndex, maximizingPlayer, values, depthLimit):
+    alpha = math.INF
+    beta = -math.INF
     # Terminating condition. i.e
     # leaf node is reached
     if depth == 3:
