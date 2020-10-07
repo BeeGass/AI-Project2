@@ -407,10 +407,11 @@ def IsGameOver(inputBoardState: Board, inputCurrentpathEvalValues: pathEvalValue
 #Algorithms
 #------------------------------------------------------------------
 #TODO add list of moves
-def MiniMax(inputMove, inputDepth, inputMaximizingPlayer):
+def MiniMax(inputMove, inputDepth, inputMaximizingPlayer, inputGameOver):
     #if the input depth is met or the game is over out put the evaluation of how good the move last made was
+    gameOver = inputGameOver
     if inputDepth == 0 or gameOver:
-        positionEval = CalculateSelfUtility()
+        positionEval = calcPathUtil()
         return positionEval #nodes associated with evals
 
     if inputMaximizingPlayer: #this is a boolean value
