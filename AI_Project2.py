@@ -78,8 +78,8 @@ def MakeStartingNode(inputStartingMove: Move):
 
     return firstNode
 
-def CreateTree(Move: inputStartingMove, int: depthLimit):
-    rootNode = firstNode = MiniMaxNode(parent = None, children = None, currentVal = inputStartingMove.utility, currentMove = inputStartingNode)
+def CreateTree(inputStartingNode: MiniMaxNode, depthLimit: int):
+    rootNode = firstNode = MiniMaxNode(parent = None, children = None, currentVal = inputStartingNode.currentVal, currentMove = inputStartingNode.currentMove)
     rootNode.children = CreateChildren(rootNode.currentMove, depthLimit, 0)
 
     return rootNode
@@ -412,18 +412,21 @@ def MinimaxABprune(node, depth, nodeIndex, maximizingPlayer, values, depthLimit)
 
         return best
 
-def AlphaBetaPruning(inputBoard: Board, inputPlayerTurn: int, inputDepth: int, inputAlpha: infinity, inputBeta: infinity):
+def AlphaBetaPruning(inputBoard: Board, inputPlayerTurn: int, inputDepth: int, inputAlpha: infinity, inputBeta: infinity, inputMove: Move):
     gameOver = IsGameOver(inputBoard, eval)
-
     alpha = inputAlpha
     beta = -inputBeta
+
+    if inputMove.moveNum == 0:
+        startingNode = MakeStartingNode(inputMove)
+        CreateTree(startingNode, inputDepth)
 
     if inputDepth == 0 or gameOver:
         positionEval = BoardEval(inputBoard, inputPlayerTurn)
         return positionEval
 
     if inputMaximizingPlayer:
-        for child in inputMove:
+        for child in startingNode:
             eval = Minimax(child, inputDepth - 1, alpha, beta, False)
             maxEval = max(maxEval, eval)
 
@@ -433,7 +436,7 @@ def AlphaBetaPruning(inputBoard: Board, inputPlayerTurn: int, inputDepth: int, i
 
             return maxEval
     else:
-        for child in inputMove:
+        for child in startingNode:
             eval = Minimax(child, inputDepth - 1, alpha, beta, True)
             minEval = min(minEval, eval)
 
