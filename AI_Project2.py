@@ -1,11 +1,8 @@
 from os import path
-<<<<<<< HEAD
 from Board import Board, Vector, BoardConfiguration
 import ConfigsEnum, math, paths
-=======
 from Board import Board, Vector, BoardConfiguration, pathEvalValues
 import math, paths
->>>>>>> a1014f4285040a888a81ef011be9dd4aef319a3d
 import numpy as np
 groupName = "Sigmoid"
 moveNum = 0 #The move number in the game
@@ -22,7 +19,6 @@ def main():
 def PlayGame(board):
     #exit(0)
     global moveNum
-    print("Waiting for other player. . .")
     while not path.exists(paths.goFile): #waits until it is the player's move
         pass
     if path.exists(paths.endgame):
@@ -35,27 +31,20 @@ def PlayGame(board):
             print("Here")
             f = open(paths.move_file).read()
             lines = f.split()
+            moveNum += 1
             if not lines == []:
                 row = LetterToNumber(lines[1])
                 col = int(lines[2])
                 board.placePiece(row, col, -1, 2, moveNum) #makes opponent move
-                moveNum += 1
-            #make move here
-            board.currentGameState.boardList[0][0] = 1
-            board.currentGameState.boardList[1][1] = 1
-            print(str(BoardEval(board, 15, 15, 1)))#TODO same as comment on line 44
-            print("Turn "+str(moveNum)+" completed.")#TODO same as comment on line 44
-            moveNum += 1 #TODO why are we adding moveNum here again, we already did one time above for the enemy turn
-            input("Press any key to continue . . .") #TODO we should probably get rid of this, the 10 second counter starts the moment the referee makes the new file for us, plus running headless will make it faster
-        #make move here
-        makeMove(board)
-        print("Turn "+str(moveNum)+" completed.")
-        moveNum += 1
-        PlayGame(board) #repeats until game completion
+    #make move here
+    makeMove(board)
+    print("Turn "+str(moveNum)+" completed.")
+    moveNum += 1
+    PlayGame(board) #repeats until game completion
 
 #Gets the optimal move using the minimax algorithm with alpha-beta pruning and performs the move
 #board: The current game board
-def makeMoveV2(board : Board):
+def makeMove(board : Board):
     global moveNum
     ##########
     #first move shit that im not sure of. Pseudo code
@@ -66,54 +55,41 @@ def makeMoveV2(board : Board):
     #########
 
     #Tree birth: Origins Part 1, the start
-    localSpiral(X, Y, listOfPreviousMoves, inputXBoard, inputXPlaceOnBoard, inputYPlaceOnBoard)
-    CreateTree(board.currentGameState, depthLimit) #TODO what is the purpose of depthLimit
-
-    #the tree opitimization Saga
-    BoardEval(board, inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn) #TODO is inputPlayerTurn pointless? We are never going to get to run this on an active enemy turn because of the while loop checking for the .go file
-    inputMove, inputDepth = AlphaBetaPruning(inputMove, inputDepth, inputAlpha, inputBeta, inputMaximizingPlayer)
+    rootNode = CreateTree(board.currentGameState, 10)
 
     #The minimax and final choice conclusion
-    inputRow, inputCol = MiniMax(inputMove, inputDepth, inputMaximizingPlayer) #should produce inputRow and inputCol
+    theMove =  AlphaBetaPruning(board, 1, 10, math.INF, math.INF)
     #the submission spinoff
-    OutputFile(inputRow, inputCol)
-
-def makeMove(board: Board):
-    global moveNum
-    global groupName
-    r = 0
-    c = 0
-    utility = 0
-    #TODO: implement actual r and c values
-    board.placePiece(0, 0, 0, 1, moveNum) #place piece on board
-    #write to the file here
-    strToWrite = groupName + " " + NumberToLetter(r) + " " + str(c)
-    f = open("move_file", "w") #open file to write over
-    f.write(strToWrite) #write the inputted move
-    f.close()
+    board.placePiece(theMove.row, theMove.col, theMove.utility, 1, moveNum)
+    OutputFile(theMove.row, theMove.col)
 
 def makefirstMove(board: board):
-    if moveNum is 0:
-        board.placePiece(7, 7, utility, 1, moveNum) #TODO how do i get the utility for the first move and why is this stored
-    else:
-        board.placePiece() #TODO place on top of enemy move if its a good move
+    # if moveNum is 0:
+    board.placePiece(7, 7, -1, 1, moveNum) #TODO how do i get the utility for the first move and why is this stored
+    # else:
+        # board.placePiece() #TODO place on top of enemy move if its a good m11
 #------------------------------------------------------------------
 
 #Tree creation functions
 #------------------------------------------------------------------
-def MakeStartingNode(inputStartingMove):
+#initializes move into a node
+#input node
+#output MinimaxNode
+def MakeStartingNode(inputStartingMove: Move):
     theMove = inputStartingMove
     firstNode = MiniMaxNode(parent = None, children = None, currentVal = theMove.utility, currentMove = theMove)
 
     return firstNode
 
-def CreateTree(inputStartingMove, depthLimit):
-    rootNode = firstNode = MiniMaxNode(parent = None, children = None, currentVal = inputStartingMove.utility, currentMove = inputStartingNode)
+#Creates the tree for minimax algorithm to running
+#input starting move, depthlimit
+def CreateTree(inputStartingNode: MiniMaxNode, depthLimit: int):
+    rootNode = firstNode = MiniMaxNode(parent = None, children = None, currentVal = inputStartingNode.currentVal, currentMove = inputStartingNode.currentMove)
     rootNode.children = CreateChildren(rootNode.currentMove, depthLimit, 0)
 
     return rootNode
 
-def CreateChildren(prevMove, depthLimit, currentDepth):
+def CreateChildren(prevMove: Move, depthLimit: int, currentDepth: int):
     children = []
     currentTurn = currentDepth % 2 + 1
     childMoves = genPossibleMoves(prevMove, currentDepth % 2 + 1)
@@ -129,7 +105,7 @@ def CreateChildren(prevMove, depthLimit, currentDepth):
     return children
 
 ## genPossibleMoves will iterate through an entire board and find all possible moves that are within 2 spaces of any given piece
-def genPossibleMoves(inputMove, player):
+def genPossibleMoves(inputMove: Move, player: int):
 
     inputMove.moveXBoardConfig = inputXBoard
     theNumber = inputMove.moveNum + 1
@@ -165,14 +141,14 @@ def genPossibleMoves(inputMove, player):
 #Math helper functions
 #------------------------------------------------------------------
 #distance formula
-def getDistance(x2, x1, y2, y1):
+def getDistance(x2: int, x1: int, y2: int, y1: int):
     dist = math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2))
 
     return dist
 
 ##getVector will take in two different points and find the vector associated with the two to create a
 #sense of direction to search for a potential continuation of connected stones
-def getVector(x2, x1, y2, y1):
+def getVector(x2: int, x1: int, y2: int, y1: int):
     xCoord = x2 - x1
     yCoord = y2 - y1
     orderedPair = Vector(x = xCoord, y = yCoord)
@@ -182,9 +158,10 @@ def getVector(x2, x1, y2, y1):
 
 #Board evaluation functions
 #------------------------------------------------------------------
-def BoardEval(board, inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn):
-    X = inputBoardDimensionX
-    Y = inputBoardDimensionY
+def BoardEval(board: Board, inputPlayerTurn: int):
+    X = 15
+    Y = 15
+
     turn = inputPlayerTurn
     oppTurn = 2 if turn == 1 else 1 #assigns opponent turn to opposite of current turn
     totalUtil = 0 #the utility value to return
@@ -216,7 +193,6 @@ def BoardEval(board, inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn
             spot = boardConfig.currentGameState.boardList[x][y]
 
             if spot != 0:
-
                 if not stoneArrForSelf:
                     stoneArrForSelf = location
                 elif stoneArrForSelf:
@@ -276,7 +252,7 @@ def BoardEval(board, inputBoardDimensionX, inputBoardDimensionY, inputPlayerTurn
 #   +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+                           +---+---+---+---+---+
 #                                                                                        2  |21↑|20←|19←|18←|17←|
 #                                                                                           +---+---+---+---+---+
-def localSpiral(X, Y, listOfPreviousMoves, inputXBoard, inputXPlaceOnBoard, inputYPlaceOnBoard):
+def localSpiral(X: int, Y: int, listOfPreviousMoves: list, inputXBoard: Board, inputXPlaceOnBoard: int, inputYPlaceOnBoard: int):
 
     # trueX and trueY are the x and y values associated with the real game board
     #this is because it can be thought of that spiral() analyzes a the game board a zoomed in manner
@@ -329,7 +305,7 @@ def localSpiral(X, Y, listOfPreviousMoves, inputXBoard, inputXPlaceOnBoard, inpu
 #startPos: The vector indicating the path's starting location
 #dir: The direction of the path
 #player: The player to calculate the util for
-def calcPathUtil (boardState, startPos, dir, player):
+def calcPathUtil (Board: boardState, startPos: Vector, dir: Vector, player: int):
     currentPos = Vector(startPos.x + dir.x, startPos.y + dir.y); #represents the current position in the search
     pathLength = 1 #represents the length of the path
     block = 0 #0 if path is not obstructed on either side, 1 if obstructed on 1 side, 2 if obstructed on both sides
@@ -368,18 +344,18 @@ def calcPathUtil (boardState, startPos, dir, player):
                 break #break out of the for loop if >1 gap is found
         currentPos.x -= 1
         currentPos.y -= 1
-                    
+
     #return the appropriate eval values based on the path
-     if pathLength == 5:
+    if pathLength == 5:
        return pathEvalValues.FIVE
     if block == 2 and not gap: #if the path is obstructed on both sides and there is no gap in the middle, the position is worth nothing
         return 0
 
     live: bool #indicates if the path is being evaluated as live or not
-    live = (gap and block < 2) or (!gap and block < 1)
+    live = (gap and block < 2) or (not gap and block < 1)
     #explanation:
     #if there is a gap in the path, it can be blocked on at most 1 side and still be live
-    #if no gap exists, it can only be live if there is no block on either side   
+    #if no gap exists, it can only be live if there is no block on either side
 
     if pathLength == 4:
         return pathEvalValues.LIVEFOUR if live else pathEvalValues.DEADFOUR #ternary to check if the path is live or not
@@ -390,35 +366,28 @@ def calcPathUtil (boardState, startPos, dir, player):
     elif pathLength <= 1: #any path <= 1 in length is not worth anything
         return 0
     return 0
+
+def IsGameOver(inputBoardState: Board, inputCurrentpathEvalValues: pathEvalValues):
+    theGame =  inputBoardState.currentGameState
+    pointState = inputBoardState.utility
+    gameOver = None
+    currentPointVals = inputCurrentpathEvalValues
+
+    if pointState <= 0:
+        gameOver = False
+
+    if currentPointVals.FIVE == someValueRepresentingEvalAssociatedWithWinning: #input value here that represents when we win
+        gameOver = True
+
+    return gameOver
 #------------------------------------------------------------------
-
-
 
 #Algorithms
 #------------------------------------------------------------------
-#TODO add list of moves
-def MiniMax(inputMove, inputDepth, inputMaximizingPlayer):
-    #if the input depth is met or the game is over out put the evaluation of how good the move last made was
-    if inputDepth == 0 or gameOver:
-        positionEval = CalculateSelfUtility()
-        return positionEval #nodes associated with evals
-
-    if inputMaximizingPlayer: #this is a boolean value
-        maxEval = -math.INF
-
-        for child in inputMove:
-            eval = MiniMax(child, inputDepth - 1, false)
-            maxEval = max(maxEval, eval)
-            return maxEval
-    else:
-        minEval = math.inf
-        for child in inputMove:
-            eval = MiniMax(child, depth - 1, true)
-            minEval = min(minEval, eval)
-            return minEval
-
 #ripped from geek4geeks, returns a single value tho, worth a look
-def MinimaxABprune(depth, nodeIndex, maximizingPlayer, values, alpha, beta):
+def MinimaxABprune(node, depth, nodeIndex, maximizingPlayer, values, depthLimit):
+    alpha = math.INF
+    beta = -math.INF
     # Terminating condition. i.e
     # leaf node is reached
     if depth == 3:
@@ -447,14 +416,23 @@ def MinimaxABprune(depth, nodeIndex, maximizingPlayer, values, alpha, beta):
                 break
 
         return best
-def AlphaBetaPruning(inputMove, inputDepth, inputAlpha, inputBeta, inputMaximizingPlayer):
+
+def AlphaBetaPruning(inputBoard: Board, inputPlayerTurn: int, inputDepth: int, inputAlpha: infinity, inputBeta: infinity, inputMove: Move):
+    gameOver = IsGameOver(inputBoard, eval)
+    alpha = inputAlpha
+    beta = -inputBeta
+
+    if inputMove.moveNum == 0:
+        startingNode = MakeStartingNode(inputMove)
+        CreateTree(startingNode, inputDepth)
+
     if inputDepth == 0 or gameOver:
-        positionEval = CalculateSelfUtility()
+        positionEval = BoardEval(inputBoard, inputPlayerTurn)
         return positionEval
 
     if inputMaximizingPlayer:
-        for child in inputMove:
-            eval = Minimax(child, inputDepth - 1, inputAlpha, inputBeta, false)
+        for child in startingNode:
+            eval = Minimax(child, inputDepth - 1, alpha, beta, False)
             maxEval = max(maxEval, eval)
 
             alpha = max(alpha, eval)
@@ -463,17 +441,16 @@ def AlphaBetaPruning(inputMove, inputDepth, inputAlpha, inputBeta, inputMaximizi
 
             return maxEval
     else:
-        for child in inputMove:
-            eval = Minimax(child, inputDepth - 1, inputAlpha, inputBeta, true)
+        for child in startingNode:
+            eval = Minimax(child, inputDepth - 1, alpha, beta, True)
             minEval = min(minEval, eval)
 
             beta = min(beta, eval)
             if beta <= alpha:
                 break
+
             return minEval
 #------------------------------------------------------------------
-
-
 
 #------------------------------------------------------------------
 #Heuristics that limit the depth to which the game tree is expanded
@@ -511,7 +488,7 @@ def UCB1(node):
 
 ##function to output file with the move of our agent
 #format: <groupname> <column> <row>
-def OutputFile(inputRow, inputCol):
+def OutputFile(inputRow: chr, inputCol: int):
     f = open(paths.move_file, "w")
     f.write("Sigmoid {} {}\n".format(inputCol, inputRow))
     f.close
@@ -524,13 +501,13 @@ def OutputFile(inputRow, inputCol):
 #example: 1->A
 #         2->B
 #         3->C
-def NumberToLetter(inputColAsNumber):
+def NumberToLetter(inputColAsNumber: int):
     theLetter = chr(ord('@') + inputColAsNumber)
     return theLetter
 
 ##The opposite of NumberToLetter. It takes in a letter and converts it
 #into a number
-def LetterToNumber(inputColAsLetter):
+def LetterToNumber(inputColAsLetter: chr):
     theNumber = ord(inputColAsLetter) - ord('@')
     return theNumber
 
