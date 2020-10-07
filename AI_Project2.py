@@ -1,9 +1,6 @@
 from os import path
-<<<<<<< HEAD
-=======
 from Board import Board, Vector, BoardConfiguration
 import ConfigsEnum, math, paths
->>>>>>> e1efda0b2f1fcb9fa1bd6a830480114b797379ee
 from Board import Board, Vector, BoardConfiguration, pathEvalValues
 import math, paths
 import numpy as np
@@ -173,9 +170,10 @@ def getVector(x2: int, x1: int, y2: int, y1: int):
 
 #Board evaluation functions
 #------------------------------------------------------------------
-def BoardEval(board: Board, inputBoardDimensionX: int, inputBoardDimensionY: int, inputPlayerTurn: int):
-    X = inputBoardDimensionX
-    Y = inputBoardDimensionY
+def BoardEval(board: Board, inputPlayerTurn: int):
+    X = 15
+    Y = 15
+
     turn = inputPlayerTurn
     oppTurn = 2 if turn == 1 else 1 #assigns opponent turn to opposite of current turn
     totalUtil = 0 #the utility value to return
@@ -398,32 +396,11 @@ def IsGameOver(inputBoardState: Board, inputCurrentpathEvalValues: pathEvalValue
 
 #Algorithms
 #------------------------------------------------------------------
-#TODO add list of moves
-def MiniMax(inputMove, inputDepth, inputMaximizingPlayer, inputGameOver):
-    #if the input depth is met or the game is over out put the evaluation of how good the move last made was
-    gameOver = inputGameOver
-    if inputDepth == 0 or gameOver:
-        positionEval = calcPathUtil()
-        return positionEval #nodes associated with evals
-
-    if inputMaximizingPlayer: #this is a boolean value
-        maxEval = -math.INF
-
-        for child in inputMove:
-            eval = MiniMax(child, inputDepth - 1, false)
-            maxEval = max(maxEval, eval)
-            return maxEval
-    else:
-        minEval = math.inf
-        for child in inputMove:
-            eval = MiniMax(child, depth - 1, true)
-            minEval = min(minEval, eval)
-            return minEval
-
 #ripped from geek4geeks, returns a single value tho, worth a look
 def MinimaxABprune(depth, nodeIndex, maximizingPlayer, values):
     alpha = math.inf
     beta = -math.inf
+
     # Terminating condition. i.e
     # leaf node is reached
     if depth == 3:
@@ -452,14 +429,20 @@ def MinimaxABprune(depth, nodeIndex, maximizingPlayer, values):
                 break
 
         return best
-def AlphaBetaPruning(inputMove, inputDepth, inputAlpha, inputBeta, inputMaximizingPlayer):
+
+def AlphaBetaPruning(inputBoard: Board, inputPlayerTurn: int, inputDepth: int, inputAlpha: infinity, inputBeta: infinity):
+    gameOver = IsGameOver(inputBoard, eval)
+
+    alpha = inputAlpha
+    beta = inputBeta
+
     if inputDepth == 0 or gameOver:
-        positionEval = CalculateSelfUtility()
+        positionEval = BoardEval(inputBoard, inputPlayerTurn)
         return positionEval
 
     if inputMaximizingPlayer:
         for child in inputMove:
-            eval = Minimax(child, inputDepth - 1, inputAlpha, inputBeta, false)
+            eval = Minimax(child, inputDepth - 1, alpha, beta, False)
             maxEval = max(maxEval, eval)
 
             alpha = max(alpha, eval)
@@ -469,12 +452,13 @@ def AlphaBetaPruning(inputMove, inputDepth, inputAlpha, inputBeta, inputMaximizi
             return maxEval
     else:
         for child in inputMove:
-            eval = Minimax(child, inputDepth - 1, inputAlpha, inputBeta, true)
+            eval = Minimax(child, inputDepth - 1, alpha, beta, True)
             minEval = min(minEval, eval)
 
             beta = min(beta, eval)
             if beta <= alpha:
                 break
+
             return minEval
 #------------------------------------------------------------------
 
