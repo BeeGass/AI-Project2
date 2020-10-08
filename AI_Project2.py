@@ -22,8 +22,7 @@ def PlayGame(board):
     global moveNum
     while not path.exists(paths.goFile): #waits until it is the player's move
         pass
-    if path.exists(paths.endgame):
-        #end of game
+    if path.exists(paths.endgame): #end of game
         print("End of game")
         im = Image.open('img.jpg') #this is meme, dont kill me pls
         im.show('image',im) #this is meme, dont kill me pls
@@ -36,9 +35,9 @@ def PlayGame(board):
             lines = f.split()
             moveNum += 1
             if not lines == []:
-                row = LetterToNumber(lines[1])
-                col = int(lines[2])
-                board.placePiece(row, col, -1, 2, moveNum) #makes opponent move
+                col = LetterToNumber(lines[1])
+                row = int(lines[2])
+                board.placePiece(col, row, -1, 2, moveNum) #makes opponent move
     #make move here
     makeMove(board)
     print("Turn "+str(moveNum)+" completed.")
@@ -48,25 +47,19 @@ def PlayGame(board):
 #Gets the optimal move using the minimax algorithm with alpha-beta pruning and performs the move
 #board: The current game board
 def makeMove(board : Board):
-    global moveNum, decisionTree
+    global moveNum
 
-    ##########
     #first move shit that im not sure of. Pseudo code
     if moveNum == 0 or moveNum == 1:
-        startingMove = makefirstMove(board) #TODO create me father
+        makefirstMove(board) #TODO create me father
         OutputFile(7, 7)
-        startingNode = MakeStartingNode(startingMove)
-        #MakeStartingNode(startingMove) #TODO god left me unfinished
-        return -69
-    #########
+        print("outputted the first move")
 
-    #Minimax doing its thing bruv
-    newTree = MiniMaxConAlphaBetaPruning(MinimaxNode(decisionTree, 10, math.INF, math.INF, Move))
-    theMove = newTree.currentMove
-    decisionTree = newTree
-    #the submission spinoff
-    board.placePiece(theMove.row, theMove.col, theMove.utility, 1, moveNum)
-    OutputFile(theMove.row, theMove.col)
+    else:
+        OppPlayerNode = MakeStartingNode(board)
+        theMove = MiniMaxConAlphaBetaPruning(CreateTree(OppPlayerNode, 4), 4, math.INF, -math.INF, True).currentMove #TODO: implement function that will dynamically determine input depth based off time left and moveNum
+        board.placePiece(theMove.col, theMove.row, theMove.utility, 1, moveNum)
+        OutputFile(theMove.col, theMove.row)
 
 def makefirstMove(board: Board):
     # if moveNum is 0:
@@ -80,8 +73,8 @@ def makefirstMove(board: Board):
 #initializes move into a node
 #input node
 #output MinimaxNode
-def MakeStartingNode(inputStartingMove: Move):
-    theMove = inputStartingMove
+def MakeStartingNode(inputBoard: Board):
+    theMove = board.savedMovesOpp[-1]
     firstNode = MiniMaxNode(parent = None, children = None, currentVal = theMove.utility, currentMove = theMove)
 
     return firstNode
@@ -136,7 +129,7 @@ def genPossibleMoves(inputMove: Move, player: int):
 
             for move in ListOfMovesForPiece: #if the move from list of moves found at (i, j) is not within the total list of all possible moves, given the boardstate inputted, add to the list
                 if not move in ListOfAllPossibleMoves:
-                    ListOfAllPossibleMoves.append(Move(player, row = move.x, col = move.y, utility = -1, board = inputXBoard.boardList.append(move), moveNum = theNumber))
+                    ListOfAllPossibleMoves.append(Move(player, col = move.x, row = move.y, utility = -1, board = inputXBoard.boardList.append(move), moveNum = theNumber))
 
     if ListOfAllPossibleMoves == []: #if the list is empty then no moves have been made and we need to perform the first move
         PerformFirstMove() #TODO: implement this function
@@ -374,32 +367,29 @@ def calcPathUtil (Board: BoardConfiguration, startPos: Vector, dir: Vector, play
         return 0
     return 0
 
-def IsGameOver(inputBoardState: Board, inputCurrentpathEvalValues: pathEvalValues):
-    theGame =  inputBoardState
-    pointState = inputBoardState.utility
-    gameOver = None
-    currentPointVals = inputCurrentpathEvalValues
+def IsGameOver(inputBoardState: BoardConfiguration):
+    boardConfig = inputBoardState
+    for i in range(len(boardConfig)):
+        for j in range(len(boardConfig[i])):
+            if boardConfig[i][j] != 0:
+                currentVal = boardConfig[i][j]
+                directions = {Vector(1,0), Vector(0,1), Vector(1,1), Vector(-1,0), Vector(-1,1), Vector(0,-1), Vector(-1,-1), Vector(1,-1)}
+                for direction in directions:
+                    if boardConfig[i+direction.x,j+direction.y] == currentVal:
+                        if calcPathUtil(board, Vector(i,j), direction, currentVal) == pathEvalValues.FIVE:
+                            return True
+    return False
 
-    if pointState <= 0:
-        gameOver = False
-
-    if currentPointVals.FIVE == someValueRepresentingEvalAssociatedWithWinning: #input value here that represents when we win
-        gameOver = True
-
-    return gameOver
 #------------------------------------------------------------------
 
 #Algorithms
 #------------------------------------------------------------------
 def MiniMaxConAlphaBetaPruning(inputNode: MiniMaxNode, inputDepth: int, inputAlpha, inputBeta, inputPlayerTurn: bool):
-    global decisionTree
-    gameOver = IsGameOver(inputNode.move.moveXBoardConfig, eval) #TODO: implement that beh Bryan pls explain purpose of eval
+    gameOver = IsGameOver(inputNode.currentMove.moveXBoardConfig)
     alpha = inputAlpha
     beta = inputBeta
     infinity = math.INF
     negInfinity = -math.INF
-
-    CreateTree(inputNode, inputDepth)
 
     if inputDepth == 0 or gameOver:
         inputNode.move.currentVal = BoardEval(inputNode.move.moveXBoardConfig)
@@ -476,9 +466,10 @@ def UCB1(node):
 
 ##function to output file with the move of our agent
 #format: <groupname> <column> <row>
-def OutputFile(inputRow: chr, inputCol: int):
+def OutputFile(inputCol: int, inputRow: int):
+    colLetter = NumberToLetter(inputCol)
     f = open(paths.move_file, "w")
-    f.write("Sigmoid {} {}\n".format(inputCol, inputRow))
+    f.write("Sigmoid {} {}\n".format(colLetter, str(inputRow)))
     f.close
 
     return f
