@@ -55,11 +55,13 @@ def makeMove(board : Board):
     if moveNum == 0 or moveNum == 1:
         startingMove = makefirstMove(board) #TODO create me father
         OutputFile(7, 7)
+        startingNode = MakeStartingNode(startingMove)
         #MakeStartingNode(startingMove) #TODO god left me unfinished
         return -69
     #########
 
     #Minimax doing its thing bruv
+    BoardEval()
     theMove = MiniMaxConAlphaBetaPruning(MinimaxNode("""TODO initialize value to current value of board"""), 10, math.INF, math.INF, Move)
     #the submission spinoff
     board.placePiece(theMove.row, theMove.col, theMove.utility, 1, moveNum)
@@ -85,19 +87,23 @@ def MakeStartingNode(inputStartingMove: Move):
 
 #Creates the tree for minimax algorithm to running
 #input starting move, depthlimit
-def CreateTree(inputStartingNode: MiniMaxNode, depthLimit: int):
-    rootNode.children = CreateChildrenForTree(inputStartingNode.currentMove, depthLimit, 0)
+def CreateTree(inputCurrentRootNode: MiniMaxNode, depthLimit: int):
+    rootNode = inputCurrentRootNode
+    rootNode.children = CreateChildrenForTree(inputCurrentRootNode.currentMove, depthLimit, 0)
+
     return rootNode
 
 def CreateChildrenForTree(prevMove: Move, depthLimit: int, currentDepth: int):
     children = []
     currentTurn = currentDepth % 2 + 1
-    childMoves = genPossibleMoves(prevMove, currentDepth % 2 + 1)
-    currentDepth += 1
+    childMoves = genPossibleMoves(prevMove, currentTurn)
+    emptyChild = []
 
     if (currentDepth >= depthLimit):
-        children.append(MiniMaxNode(parent  = prevMove, children = None, currentVal = -1, currentMove = move, evalForNextMove = -1))
+        children.append(MiniMaxNode(parent  = prevMove, children = emptyChild, currentVal = -1, currentMove = move, evalForNextMove = -1))
+
     else:
+        currentDepth += 1
         for move in childMoves:
             children.append(MiniMaxNode(parent  = prevMove, children = CreateChildrenForTree(move, depthLimit, currentDepth), currentVal = -1, currentMove = move, evalForNextMove = -1))
 
@@ -384,72 +390,53 @@ def IsGameOver(inputBoardState: Board, inputCurrentpathEvalValues: pathEvalValue
 
 #Algorithms
 #------------------------------------------------------------------
-def MiniMaxConAlphaBetaPruning(inputTreeNode: MiniMaxNode, inputStartingMove: Move, inputDepth: int, inputAlpha, inputBeta, inputPlayerTurn: bool):
+def MiniMaxConAlphaBetaPruning(inputNode: MiniMaxNode, inputDepth: int, inputAlpha, inputBeta, inputPlayerTurn: bool):
     global decisionTree
-    gameOver = IsGameOver(inputTreeNode.move.moveXBoardConfig, eval) #TODO: implement that beh Bryan pls explain purpose of eval
+    gameOver = IsGameOver(inputNode.move.moveXBoardConfig, eval) #TODO: implement that beh Bryan pls explain purpose of eval
     alpha = inputAlpha
     beta = inputBeta
     infinity = math.INF
     negInfinity = -math.INF
 
-    if moveNum == 0 or moveNum == 1
-        startingNode = MakeStartingNode(inputStartingMove)
-        decisionTree = CreateTree(startingNode, inputDepth)
-        inputTreeNode = descisionTree
-
-    if moveNum > 1:
-
+    CreateTree(inputNode, inputDepth)
 
     if inputDepth == 0 or gameOver:
-        return inputTreeNode.move
+        inputNode.move.currentVal = BoardEval(inputNode.move.moveXBoardConfig)
+
+        return inputNode
 
     if inputPlayerTurn:
         maxEval = negInfinity
-        maxNode = MiniMaxNode(parent = , children = , currentVal = , currentMove = , evalForNextMove = ) #TODO create a node with infinity and then
 
         for child in startingNode.children:
-            aNode = MiniMaxConAlphaBetaPruning(inputBoard, child, inputDepth - 1, alpha, beta, False)
-            maxEval = max(maxEval, aNode.currentVal)
+            aNode = MiniMaxConAlphaBetaPruning(inputNode, inputDepth - 1, inputAlpha, inputBeta, False)
+
+            if aNode.currentVal > maxEval:
+                maxEval = aNode.currentVal
+                maxNode = aNode
+
             maxNode = #whatever was just deemed the best
             alpha = max(alpha, aNode.currentVal)
-
             if beta <= alpha:
                 break
 
         return maxNode
+
     else:
         minEval = inifinity
 
         for child in startingNode.children:
-            aNode = Minimax(child, inputDepth - 1, alpha, beta, True)
-            minEval = min(minEval, aNode.currentVal)
+            aNode = Minimax(inputNode, inputDepth - 1, inputAlpha, inputBeta, True)
+
+            if aNode.currentVal < minEval:
+                minEval = aNode.currentVal
+                minNode = aNode
 
             beta = min(beta, aNode.currentVal)
             if beta <= alpha:
                 break
 
-        return minEval
-
-def MiniMax(inputMove, inputDepth, inputGameOver):
-    #if the input depth is met or the game is over out put the evaluation of how good the move last made was
-    gameOver = inputGameOver
-    if inputDepth == 0 or gameOver:
-        positionEval = calcPathUtil()
-        return positionEval #nodes associated with evals
-
-    if inputMaximizingPlayer: #this is a boolean value
-        maxEval = -math.INF
-
-        for child in inputMove:
-            eval = MiniMax(child, inputDepth - 1, false)
-            maxEval = max(maxEval, eval)
-            return maxEval
-    else:
-        minEval = math.inf
-        for child in inputMove:
-            eval = MiniMax(child, depth - 1, true)
-            minEval = min(minEval, eval)
-            return minEval
+        return minNode
 #------------------------------------------------------------------
 
 #------------------------------------------------------------------
