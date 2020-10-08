@@ -1,4 +1,4 @@
-from PIL import Image #this is meme, dont kill me pls
+#from PIL import Image #this is meme, dont kill me pls
 from os import path
 import math, paths
 from Board import Board, Vector, BoardConfiguration, pathEvalValues, Move, MiniMaxNode
@@ -61,8 +61,9 @@ def makeMove(board : Board):
     #########
 
     #Minimax doing its thing bruv
-    BoardEval()
-    theMove = MiniMaxConAlphaBetaPruning(MinimaxNode("""TODO initialize value to current value of board"""), 10, math.INF, math.INF, Move)
+    newTree = MiniMaxConAlphaBetaPruning(MinimaxNode(decisionTree, 10, math.INF, math.INF, Move))
+    theMove = newTree.currentMove
+    decisionTree = newTree
     #the submission spinoff
     board.placePiece(theMove.row, theMove.col, theMove.utility, 1, moveNum)
     OutputFile(theMove.row, theMove.col)
