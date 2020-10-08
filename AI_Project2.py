@@ -415,7 +415,6 @@ def MiniMaxConAlphaBetaPruning(inputNode: MiniMaxNode, inputDepth: int, inputAlp
                 maxEval = aNode.currentVal
                 maxNode = aNode
 
-            maxNode = #whatever was just deemed the best
             alpha = max(alpha, aNode.currentVal)
             if beta <= alpha:
                 break
