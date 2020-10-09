@@ -6,6 +6,9 @@ class BoardConfiguration:
     boardList: list
     def __init__(self):
         self.boardList = [[0 for x in range(self.boardSize)] for y in range(self.boardSize)]
+    def placeStone(self, col: int, row: int, player: int):
+        self.boardList[col][row] = player
+        return self
 
 #Represents the current board state of the game
 class Board:
@@ -20,11 +23,11 @@ class Board:
     #col: The column
     #Player: 1 if AI player, 2 if opponent
     #Returns true if move was successful, false otherwise
-    def placePiece(self, col, row, utility, player, moveNum):
+    def placeStone(self, col, row, utility, player, moveNum):
         if self.currentGameState.boardList[col][row] != 0 and moveNum != 1: #if the spot on the board is taken and it is not the second
             #move of the game (where placing a piece over another is a legal move)
             return False
-        self.currentGameState.boardList[col][row] = player
+        self.currentGameState.placeStone(col, row, player)
         if player == 1:
             self.savedMovesSelf.append(Move(player, col, row, utility, self.currentGameState, 0))
         if player == 2:

@@ -1,4 +1,4 @@
-#from PIL import Image #this is meme, dont kill me pls
+import time
 from os import path
 import math, paths
 from Board import Board, Vector, BoardConfiguration, pathEvalValues, Move, MiniMaxNode
@@ -35,12 +35,13 @@ def PlayGame(board):
                 if (lines[0] != groupName):
                     col = LetterToNumber(lines[1])
                     row = int(lines[2])
-                    board.placePiece(col, row, -1, 2, moveNum) #makes opponent move
+                    board.placeStone(col, row, -1, 2, moveNum) #makes opponent move
             
     #make move here
     makeMove(board)
     print("Turn "+str(moveNum)+" completed.")
     moveNum += 1
+    time.sleep(.100) #wait 100 ms to make sure the go file has been deleted before continuing
     PlayGame(board) #repeats until game completion
 
 #Gets the optimal move using the minimax algorithm with alpha-beta pruning and performs the move
@@ -57,12 +58,12 @@ def makeMove(board : Board):
     else:
         OppPlayerNode = MakeStartingNode(board)
         theMove = MiniMaxConAlphaBetaPruning(CreateTree(OppPlayerNode, 4), 4, math.INF, -math.INF, True).currentMove #TODO: implement function that will dynamically determine input depth based off time left and moveNum
-        board.placePiece(theMove.col, theMove.row, theMove.utility, 1, moveNum)
+        board.placeStone(theMove.col, theMove.row, theMove.utility, 1, moveNum)
         OutputFile(theMove.col, theMove.row)
 
 def makefirstMove(board: Board):
     # if moveNum is 0:
-    board.placePiece(7, 7, -1, 1, moveNum) #TODO how do i get the utility for the first move and why is this stored
+    board.placeStone(7, 7, -1, 1, moveNum) #TODO how do i get the utility for the first move and why is this stored
     # else:
         # board.placePiece() #TODO place on top of enemy move if its a good m11
 #------------------------------------------------------------------
@@ -92,6 +93,9 @@ def CreateTree(inputCurrentRootNode: MiniMaxNode, depthLimit: int):
     return rootNode
 
 def CreateChildrenForTree(prevMove: Move, depthLimit: int, currentDepth: int):
+    watchMove = prevMove #TODO remove for debugging purposes only
+    #Current problem:
+    #At some point a move is passed in 
     children = []
     currentTurn = currentDepth % 2 + 1
     childMoves = genPossibleMoves(prevMove, currentTurn)
@@ -134,10 +138,8 @@ def genPossibleMoves(inputMove: Move, player: int):
 
                 for move in ListOfMovesForPiece: #if the move from list of moves found at (i, j) is not within the total list of all possible moves, given the boardstate inputted, add to the list
                     if not move in ListOfAllPossibleMoves:
-                        ListOfAllPossibleMoves.append(Move(player, col = move.x, row = move.y, utility = -1, board = inputXBoard.boardList.append(move), moveNum = theNumber))
-
-    if ListOfAllPossibleMoves == []: #if the list is empty then no moves have been made and we need to perform the first move
-        PerformFirstMove() #TODO: implement this function
+                        #PROBLEM RIGHT HERE
+                        ListOfAllPossibleMoves.append(Move(player, col = move.x, row = move.y, utility = -1, board = inputXBoard.placeStone(move.x, move.y, player), moveNum = theNumber))
 
     return ListOfAllPossibleMoves #returns all possible moves
 #------------------------------------------------------------------
