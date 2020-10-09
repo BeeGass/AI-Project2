@@ -12,8 +12,7 @@ decisionTree: MiniMaxNode #the decision tree for Minimax
 #------------------------------------------------------------------
 
 def main():
-    board = Board()
-    PlayGame(board) #0 for tie, 1 for AI player wins, 2 for opposing player wins
+    PlayGame(Board()) #0 for tie, 1 for AI player wins, 2 for opposing player wins
 
 #Function which will play the Gomoku game until completion
 #board: An array represetnation of the game board
@@ -24,20 +23,20 @@ def PlayGame(board):
         pass
     if path.exists(paths.endgame): #end of game
         print("End of game")
-        im = Image.open('img.jpg') #this is meme, dont kill me pls
-        im.show('image',im) #this is meme, dont kill me pls
         exit(code=0)
     else:
         #read opponent's move here
         if path.exists(paths.move_file):
+            moveNum += 1
             print("Here")
             f = open(paths.move_file).read()
             lines = f.split()
-            moveNum += 1
             if not lines == []:
-                col = LetterToNumber(lines[1])
-                row = int(lines[2])
-                board.placePiece(col, row, -1, 2, moveNum) #makes opponent move
+                if (lines[0] != groupName):
+                    col = LetterToNumber(lines[1])
+                    row = int(lines[2])
+                    board.placePiece(col, row, -1, 2, moveNum) #makes opponent move
+            
     #make move here
     makeMove(board)
     print("Turn "+str(moveNum)+" completed.")
@@ -74,7 +73,12 @@ def makefirstMove(board: Board):
 #input node
 #output MinimaxNode
 def MakeStartingNode(inputBoard: Board):
-    theMove = board.savedMovesOpp[-1]
+    global moveNum
+    theMove : Move
+    if not inputBoard.savedMovesOpp:
+        theMove = Move(2, -1, -1, -1, inputBoard.currentGameState, moveNum)
+    else:
+        theMove = inputBoard.savedMovesOpp[-1]
     firstNode = MiniMaxNode(parent = None, children = None, currentVal = theMove.utility, currentMove = theMove)
 
     return firstNode
@@ -94,19 +98,19 @@ def CreateChildrenForTree(prevMove: Move, depthLimit: int, currentDepth: int):
     emptyChild = []
 
     if (currentDepth >= depthLimit):
-        children.append(MiniMaxNode(parent  = prevMove, children = emptyChild, currentVal = -1, currentMove = move, evalForNextMove = -1))
+        children.append(MiniMaxNode(parent  = prevMove, children = emptyChild, currentVal = -1, currentMove = move))
 
     else:
         currentDepth += 1
         for move in childMoves:
-            children.append(MiniMaxNode(parent  = prevMove, children = CreateChildrenForTree(move, depthLimit, currentDepth), currentVal = -1, currentMove = move, evalForNextMove = -1))
+            children.append(MiniMaxNode(parent  = prevMove, children = CreateChildrenForTree(move, depthLimit, currentDepth), currentVal = -1, currentMove = move))
 
     return children
 
 ## genPossibleMoves will iterate through an entire board and find all possible moves that are within 2 spaces of any given piece
 def genPossibleMoves(inputMove: Move, player: int):
-
-    inputMove.moveXBoardConfig = inputXBoard
+    #TODO fix NoneType for inputMove.moveXBoardConfig
+    inputXBoard = inputMove.moveXBoardConfig
     theNumber = inputMove.moveNum + 1
 
     #this two define the search space of a given piece should be within 2 blocks of it
@@ -116,20 +120,21 @@ def genPossibleMoves(inputMove: Move, player: int):
     #Creation of the list that will hold all possible moves on the current board
     ListOfAllPossibleMoves = []
 
-    for i,j in range(len(inputXBoard.boardList[i][j])): #iterate through the board
-        #xPlaceOnBoard and yPlaceOnBoard will be referenced within spiral()
-        xPlaceOnBoard = i
-        yPlaceOnBoard = j
+    for i in range(len(inputXBoard.boardList)): #iterate through the board
+        for j in range(len(inputXBoard.boardList[i])):
+            #xPlaceOnBoard and yPlaceOnBoard will be referenced within spiral()
+            xPlaceOnBoard = i
+            yPlaceOnBoard = j
 
-        #get current value at cell (i, j)
-        theSpot = inputXBoard.boardList[i][j]
+            #get current value at cell (i, j)
+            theSpot = inputXBoard.boardList[i][j]
 
-        if theSpot == 1 or theSpot == 2: #if the cell is either a "1" or "2" player search for a possible move
-            ListOfMovesForPiece = localSpiral(widthOfSearch, lengthOfSearch, inputXBoard, xPlaceOnBoard, yPlaceOnBoard) #returns a list of possible moves given the piece found at (i, j)
+            if theSpot == 1 or theSpot == 2: #if the cell is either a "1" or "2" player search for a possible move
+                ListOfMovesForPiece = localSpiral(widthOfSearch, lengthOfSearch, inputXBoard, xPlaceOnBoard, yPlaceOnBoard) #returns a list of possible moves given the piece found at (i, j)
 
-            for move in ListOfMovesForPiece: #if the move from list of moves found at (i, j) is not within the total list of all possible moves, given the boardstate inputted, add to the list
-                if not move in ListOfAllPossibleMoves:
-                    ListOfAllPossibleMoves.append(Move(player, col = move.x, row = move.y, utility = -1, board = inputXBoard.boardList.append(move), moveNum = theNumber))
+                for move in ListOfMovesForPiece: #if the move from list of moves found at (i, j) is not within the total list of all possible moves, given the boardstate inputted, add to the list
+                    if not move in ListOfAllPossibleMoves:
+                        ListOfAllPossibleMoves.append(Move(player, col = move.x, row = move.y, utility = -1, board = inputXBoard.boardList.append(move), moveNum = theNumber))
 
     if ListOfAllPossibleMoves == []: #if the list is empty then no moves have been made and we need to perform the first move
         PerformFirstMove() #TODO: implement this function
@@ -252,7 +257,7 @@ def BoardEval(board: Board, inputPlayerTurn: int):
 #                                                                                        2  |21↑|20←|19←|18←|17←|
 #                                                                                           +---+---+---+---+---+
 
-def localSpiral(X: int, Y: int, listOfPreviousMoves: list, inputXBoard: Board, inputXPlaceOnBoard: int, inputYPlaceOnBoard: int):
+def localSpiral(X: int, Y: int, inputXBoard: Board, inputXPlaceOnBoard: int, inputYPlaceOnBoard: int):
 
     # trueX and trueY are the x and y values associated with the real game board
     #this is because it can be thought of that spiral() analyzes a the game board a zoomed in manner
@@ -469,8 +474,12 @@ def UCB1(node):
 def OutputFile(inputCol: int, inputRow: int):
     colLetter = NumberToLetter(inputCol)
     f = open(paths.move_file, "w")
-    f.write("Sigmoid {} {}\n".format(colLetter, str(inputRow)))
-    f.close
+    strToWrite = "Sigmoid " + colLetter + " " + str(inputRow)
+    f.write(strToWrite)
+    f.close()
+    f = open(paths.move_file, "r")
+    result = f.read()
+    f.close()
 
     return f
 
@@ -487,6 +496,7 @@ def NumberToLetter(inputColAsNumber: int):
 ##The opposite of NumberToLetter. It takes in a letter and converts it
 #into a number
 def LetterToNumber(inputColAsLetter: chr):
+    inputColAsLetter = inputColAsLetter.upper()
     theNumber = ord(inputColAsLetter) - ord('@')
     return theNumber
 
