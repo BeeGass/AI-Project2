@@ -28,7 +28,6 @@ def PlayGame(board):
         #read opponent's move here
         if path.exists(paths.move_file):
             moveNum += 1
-            print("Here")
             f = open(paths.move_file).read()
             lines = f.split()
             if not lines == []:
@@ -36,7 +35,7 @@ def PlayGame(board):
                     col = LetterToNumber(lines[1])
                     row = int(lines[2])
                     board.placePiece(col, row, -1, 2, moveNum) #makes opponent move
-            
+
     #make move here
     makeMove(board)
     print("Turn "+str(moveNum)+" completed.")

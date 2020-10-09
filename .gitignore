@@ -9,6 +9,9 @@
 *.user
 *.userosscache
 *.sln.docstates
+*del_files.bat
+*history_file
+*refereeErik.py
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
