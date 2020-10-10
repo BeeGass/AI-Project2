@@ -4,10 +4,12 @@ from enum import Enum
 class BoardConfiguration:
     boardSize = 15
     boardList: list
+    occupiedSpaces = [] #list of spaces occupied on the board
     def __init__(self):
         self.boardList = [[0 for x in range(self.boardSize)] for y in range(self.boardSize)]
     def placeStone(self, col: int, row: int, player: int):
         self.boardList[col][row] = player
+        self.occupiedSpaces.append(Vector(col, row))
         return self
 
 #Represents the current board state of the game
@@ -36,16 +38,16 @@ class Board:
 
 class Move: #class representing a move made by either player
     player: int #the player that made the move
-    row: int #the row the piece was placed in
-    col: int #the column the piece was placed in
+    col: int #the row the piece was placed in
+    row: int #the column the piece was placed in
     utility: float #the utility represented by the move
     moveXBoardConfig : BoardConfiguration #the board configuration after the move has been made
     moveNum: int #the move number in the game
 
     def __init__(self, player, col, row, utility, board, moveNum):
         self.player = player
-        self.row = row
         self.col = col
+        self.row = row
         self.utility = utility
         self.moveXBoardConfig = board
         self.moveNum = moveNum
@@ -76,9 +78,9 @@ class MiniMaxNode:
 class pathEvalValues(Enum):
     FIVE = 10 #five in a row
     #TODO fill values
-    LIVEFOUR = 0
-    DEADFOUR = 0
-    LIVETHREE = 0
-    DEADTHREE = 0
-    LIVETWO = 0
-    DEADTWO = 0
+    LIVEFOUR = 9
+    DEADFOUR = 8
+    LIVETHREE = 7
+    DEADTHREE = 6
+    LIVETWO = 5
+    DEADTWO = 4
