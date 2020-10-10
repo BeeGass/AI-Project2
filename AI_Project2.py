@@ -35,8 +35,8 @@ def PlayGame(board):
             if not lines == []:
                 if (lines[0] != groupName):
                     col = LetterToNumber(lines[1])
-                    row = int(lines[2]) - 1
-                    board.placeStone(col, row, math.inf, 2, moveNum) #makes opponent move
+                    row = int(lines[2])
+                    board.placeStone(col, row, -1, 2, moveNum) #makes opponent move
             
     #make move here
     makeMove(board)

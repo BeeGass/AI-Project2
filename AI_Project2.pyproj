@@ -23,7 +23,6 @@
   <ItemGroup>
     <Compile Include="AI_Project2.py" />
     <Compile Include="Board.py" />
-    <Compile Include="ConfigsEnum.py" />
     <Compile Include="HumanDriver.py">
       <SubType>Code</SubType>
     </Compile>
@@ -31,6 +30,7 @@
   <ItemGroup>
     <Content Include="Description.txt" />
     <Content Include="README.md" />
+    <Content Include="Referee.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
