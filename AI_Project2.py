@@ -1,5 +1,6 @@
-from PIL import Image #this is meme, dont kill me pls
+import time
 from os import path
+import copy
 import math, paths
 from Board import Board, Vector, BoardConfiguration, pathEvalValues, Move, MiniMaxNode
 import math, paths
@@ -7,67 +8,66 @@ import math, paths
 groupName = "Sigmoid"
 moveNum = 0 #The move number in the game
 decisionTree: MiniMaxNode #the decision tree for Minimax
+treeSize = 0
 
 #Base game functions
 #------------------------------------------------------------------
 
 def main():
-    board = Board()
-    PlayGame(board) #0 for tie, 1 for AI player wins, 2 for opposing player wins
+    PlayGame(Board()) #0 for tie, 1 for AI player wins, 2 for opposing player wins
 
 #Function which will play the Gomoku game until completion
-#board: An array represetnation of the game board
+#board1: An array represetnation of the game board
 def PlayGame(board):
     #exit(0)
     global moveNum
     while not path.exists(paths.goFile): #waits until it is the player's move
         pass
-    if path.exists(paths.endgame):
-        #end of game
+    if path.exists(paths.endgame): #end of game
         print("End of game")
-        im = Image.open('img.jpg') #this is meme, dont kill me pls
-        im.show('image',im) #this is meme, dont kill me pls
         exit(code=0)
     else:
         #read opponent's move here
         if path.exists(paths.move_file):
-            print("Here")
+            moveNum += 1
             f = open(paths.move_file).read()
             lines = f.split()
-            moveNum += 1
             if not lines == []:
-                row = LetterToNumber(lines[1])
-                col = int(lines[2])
-                board.placePiece(row, col, -1, 2, moveNum) #makes opponent move
+                if (lines[0] != groupName):
+                    col = LetterToNumber(lines[1])
+                    row = int(lines[2]) - 1
+                    board.placeStone(col, row, math.inf, 2, moveNum) #makes opponent move
+            
     #make move here
     makeMove(board)
     print("Turn "+str(moveNum)+" completed.")
-    moveNum += 1
-    PlayGame(board) #repeats until game completion
+    time.sleep(.5) #wait 100 ms to make sure the go file has been deleted before continuing
+    board = PlayGame(board) #repeats until game completion
 
 #Gets the optimal move using the minimax algorithm with alpha-beta pruning and performs the move
 #board: The current game board
 def makeMove(board : Board):
-    global moveNum, decisionTree
+    global moveNum
 
-    ##########
     #first move shit that im not sure of. Pseudo code
-    if moveNum == 0 or moveNum == 1:
-        startingMove = makefirstMove(board) #TODO create me father
+    if moveNum == 0 or moveNum == 1:  
+        makefirstMove(board)
         OutputFile(7, 7)
-        #MakeStartingNode(startingMove) #TODO god left me unfinished
-        return -69
-    #########
+        print("outputted the first move")
 
-    #Minimax doing its thing bruv
-    theMove = MiniMaxConAlphaBetaPruning(MinimaxNode("""TODO initialize value to current value of board"""), 10, math.INF, math.INF, Move)
-    #the submission spinoff
-    board.placePiece(theMove.row, theMove.col, theMove.utility, 1, moveNum)
-    OutputFile(theMove.row, theMove.col)
+    else:
+        OppPlayerNode = MakeStartingNode(board)
+        theMove = MiniMaxConAlphaBetaPruning(CreateTree(OppPlayerNode, 1), 1, math.inf, -math.inf, False).currentMove #TODO: implement function that will dynamically determine input depth based off time left and moveNum
+        print(str(theMove.col) + " " + str(theMove.row))
+        board.placeStone(theMove.col, theMove.row, theMove.utility, 1, moveNum)
+        OutputFile(theMove.col, theMove.row)
+
+    moveNum += 1
+    return board
 
 def makefirstMove(board: Board):
     # if moveNum is 0:
-    board.placePiece(7, 7, -1, 1, moveNum) #TODO how do i get the utility for the first move and why is this stored
+    board.placeStone(7, 7, -1, 1, moveNum) #TODO how do i get the utility for the first move and why is this stored
     # else:
         # board.placePiece() #TODO place on top of enemy move if its a good m11
 #------------------------------------------------------------------
@@ -77,36 +77,62 @@ def makefirstMove(board: Board):
 #initializes move into a node
 #input node
 #output MinimaxNode
-def MakeStartingNode(inputStartingMove: Move):
-    theMove = inputStartingMove
-    firstNode = MiniMaxNode(parent = None, children = None, currentVal = theMove.utility, currentMove = theMove)
+def MakeStartingNode(inputBoard: Board):
+    global moveNum
+
+    if not inputBoard.savedMovesOpp:
+        theMove = Move(player = 2, col = -1, row = -1, utility = -1, board = inputBoard.currentGameState, moveNum = moveNum)
+    else:
+        theMove = inputBoard.savedMovesOpp[-1]
+        print("Saved moves opp")
+        print(str(theMove.col) + " " + str(theMove.row))
+        firstNode = MiniMaxNode(parent = None, children = None, currentVal = theMove.utility, currentMove = theMove)
 
     return firstNode
 
 #Creates the tree for minimax algorithm to running
 #input starting move, depthlimit
-def CreateTree(inputStartingNode: MiniMaxNode, depthLimit: int):
-    rootNode.children = CreateChildrenForTree(inputStartingNode.currentMove, depthLimit, 0)
+def CreateTree(inputCurrentRootNode: MiniMaxNode, currentDepth: int):
+    rootNode = inputCurrentRootNode
+    if inputCurrentRootNode.currentMove.player == 2:
+        rootNode.children = CreateChildrenForTree(inputCurrentRootNode.currentMove, currentDepth, 1)
+    else:
+        rootNode.children = CreateChildrenForTree(inputCurrentRootNode.currentMove, currentDepth, 1)
+
     return rootNode
 
-def CreateChildrenForTree(prevMove: Move, depthLimit: int, currentDepth: int):
+def CreateChildrenForTree(prevMove: Move, currentDepth: int, currentTurn: int):
+    global treeSize
+    oppTurn: int
     children = []
-    currentTurn = currentDepth % 2 + 1
-    childMoves = genPossibleMoves(prevMove, currentDepth % 2 + 1)
-    currentDepth += 1
+    childMoves = genPossibleMoves(prevMove, currentTurn)
+    emptyChild = []
 
-    if (currentDepth >= depthLimit):
-        children.append(MiniMaxNode(parent  = prevMove, children = None, currentVal = -1, currentMove = move, evalForNextMove = -1))
-    else:
-        for move in childMoves:
-            children.append(MiniMaxNode(parent  = prevMove, children = CreateChildrenForTree(move, depthLimit, currentDepth), currentVal = -1, currentMove = move, evalForNextMove = -1))
+    if currentTurn == 1:
+        oppTurn = 2
+    if currentTurn == 2:
+        oppTurn = 1
 
+    if (currentDepth <= 0):
+        treeSize += 1
+        children.append(MiniMaxNode(parent  = prevMove, children = emptyChild, currentVal = -1, currentMove = prevMove))
+    elif (currentDepth > 0):
+        children.append(MiniMaxNode(parent = prevMove, children = childMoves, currentVal = -1, currentMove = prevMove))
+        treeSize += 1
+
+        for i in range(len(children)):
+            for j in range(len(childMoves)):
+                spotInChildList = children[i]
+                spotInChildList.children[j] = CreateChildrenForTree(spotInChildList.children[j], currentDepth - 1, oppTurn)
+
+    print("Tree size: " + str(treeSize))
     return children
 
 ## genPossibleMoves will iterate through an entire board and find all possible moves that are within 2 spaces of any given piece
 def genPossibleMoves(inputMove: Move, player: int):
-
-    inputMove.moveXBoardConfig = inputXBoard
+    #TODO fix NoneType for inputMove.moveXBoardConfig
+    inputXBoard = inputMove.moveXBoardConfig
+    
     theNumber = inputMove.moveNum + 1
 
     #this two define the search space of a given piece should be within 2 blocks of it
@@ -116,23 +142,26 @@ def genPossibleMoves(inputMove: Move, player: int):
     #Creation of the list that will hold all possible moves on the current board
     ListOfAllPossibleMoves = []
 
-    for i,j in range(len(inputXBoard.boardList[i][j])): #iterate through the board
+    for position in inputMove.moveXBoardConfig.occupiedSpaces:
         #xPlaceOnBoard and yPlaceOnBoard will be referenced within spiral()
-        xPlaceOnBoard = i
-        yPlaceOnBoard = j
+        xPlaceOnBoard = position.x
+        yPlaceOnBoard = position.y
 
         #get current value at cell (i, j)
-        theSpot = inputXBoard.boardList[i][j]
+        theSpot = inputXBoard.boardList[position.x][position.y]
 
         if theSpot == 1 or theSpot == 2: #if the cell is either a "1" or "2" player search for a possible move
-            ListOfMovesForPiece = localSpiral(widthOfSearch, lengthOfSearch, inputXBoard, xPlaceOnBoard, yPlaceOnBoard) #returns a list of possible moves given the piece found at (i, j)
+            #ListOfMovesForPiece = localSpiral(widthOfSearch, lengthOfSearch, inputXBoard, xPlaceOnBoard, yPlaceOnBoard) #returns a list of possible moves given the piece found at (i, j)
+            ListOfMovesForPiece = localSpiralReplacement(xPlaceOnBoard, yPlaceOnBoard, inputXBoard)
 
             for move in ListOfMovesForPiece: #if the move from list of moves found at (i, j) is not within the total list of all possible moves, given the boardstate inputted, add to the list
                 if not move in ListOfAllPossibleMoves:
-                    ListOfAllPossibleMoves.append(Move(player, row = move.x, col = move.y, utility = -1, board = inputXBoard.boardList.append(move), moveNum = theNumber))
-
-    if ListOfAllPossibleMoves == []: #if the list is empty then no moves have been made and we need to perform the first move
-        PerformFirstMove() #TODO: implement this function
+                    #PROBLEM RIGHT HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    newBoard = BoardConfiguration()
+                    newBoard.boardList = copy.deepcopy(inputXBoard.boardList)
+                    newBoard.occupiedSpaces = copy.deepcopy(inputXBoard.occupiedSpaces)
+                    newBoard.placeStone(move.x, move.y, player)
+                    ListOfAllPossibleMoves.append(Move(player, col = move.x, row = move.y, utility = -1, board = newBoard, moveNum = theNumber))
 
     return ListOfAllPossibleMoves #returns all possible moves
 #------------------------------------------------------------------
@@ -157,62 +186,72 @@ def getVector(x2: int, x1: int, y2: int, y1: int):
 
 #Board evaluation functions
 #------------------------------------------------------------------
-def BoardEval(board: Board, inputPlayerTurn: int):
-    X = 15
-    Y = 15
+def BoardEval(board: BoardConfiguration, inputPlayerTurn: int):
+    oppTurn = 2 if inputPlayerTurn == 1 else 1 #assigns opponent turn to opposite of current turn
+    totalUtil = 0
+    directions = {Vector(1,0), Vector(0,1), Vector(1,1), Vector(-1,0), Vector(-1,1), Vector(0,-1), Vector(-1,-1), Vector(1,-1)}
 
-    turn = inputPlayerTurn
-    oppTurn = 2 if turn == 1 else 1 #assigns opponent turn to opposite of current turn
-    totalUtil = 0 #the utility value to return
-
-    x = 0
-    y = 0
-    dx = 0
-    dy = -1
-    adjX = 0
-    adjY = 0
-
-    stoneArrForOpp = []
-    stoneCounterForOpp = 0
-
-    stoneArrForSelf = []
-    stoneCounterForSelf = 0
-
-    for i in range(max(X, Y)**2):
-        if (int(-X/2) < x <= int(X/2)) and (int(-Y/2) < y <= int(Y/2)):
-            location = []
-            #TODO shoudnt adjX and adjY be lists containing a coordinate? Given that the board is a 2d array
-            adjX = x+7
-            adjY = y+7
-            location.append(adjX)
-            location.append(adjY)
-
-            print("X: "+str(adjX)+", Y: "+str(adjY))
-
-            spot = boardConfig.currentGameState.boardList[x][y]
-
-            if spot != 0:
-                if not stoneArrForSelf:
-                    stoneArrForSelf = location
-                elif stoneArrForSelf:
-                    dist = getDistance(stoneArrForSelf[0], location[0], stoneArrForSelf[1], location[1])
-                    if dist < 2:
-                        stoneCounterForSelf = stoneCounterForSelf + 1
-                        #add the utility for the current player and subtract the utility for the opposing player
-                        if spot == turn:
-                            totalUtil += calcPathUtil(boardConfig.currentGameState.boardList, Vector(stoneArrForSelf[0], stoneArrForSelf[1]), getVector(location[0], stoneArrForSelf[0], location[1], stoneArrForSelf[1]), turn)
-                        if spot == oppTurn:
-                            totalUtil -= calcPathUtil(boardConfig.currentGameState.boardList, Vector(stoneArrForSelf[0], stoneArrForSelf[1]), getVector(location[0], stoneArrForSelf[0], location[1], stoneArrForSelf[1]), oppTurn)
-                        stoneArrForSelf = []
-                        stoneArrForSelf = location
-                    elif dist > 1:
-                        stoneCounterForSelf = 0
-                        stoneArrForSelf = []
-        if x == y or (x < 0 and x == -y) or (x > 0 and x == 1-y):
-            dx, dy = -dy, dx
-        x, y = x+dx, y+dy
+    for move in board.occupiedSpaces:
+        for direction in directions:
+            totalUtil += calcPathUtil(board = board, startPos = move, dir = direction, player = inputPlayerTurn)
+            totalUtil -= calcPathUtil(board = board, startPos = move, dir = direction, player = oppTurn)
 
     return totalUtil
+
+    #X = 15
+    #Y = 15
+
+    #turn = inputPlayerTurn
+    #oppTurn = 2 if turn == 1 else 1 #assigns opponent turn to opposite of current turn
+    #totalUtil = 0 #the utility value to return
+
+    #x = 0
+    #y = 0
+    #dx = 0
+    #dy = -1
+    #adjX = 0
+    #adjY = 0
+
+    #stoneArrForOpp = []
+    #stoneCounterForOpp = 0
+
+    #stoneArrForSelf = []
+    #stoneCounterForSelf = 0
+
+    #for i in range(max(X, Y)**2):
+    #    if (int(-X/2) <= x <=  (int(X/2) + 1)) and (int(-Y/2) <= y <= (int(Y/2) + 1)):
+    #        location = []
+    #        #TODO shoudnt adjX and adjY be lists containing a coordinate? Given that the board is a 2d array
+    #        adjX = x+7
+    #        adjY = y+7
+    #        location.append(adjX)
+    #        location.append(adjY)
+
+    #        spot = board.boardList[adjX][adjY]
+
+    #        if spot != 0:
+    #            if not stoneArrForSelf:
+    #                stoneArrForSelf = location
+    #            elif stoneArrForSelf:
+    #                dist = getDistance(stoneArrForSelf[0], location[0], stoneArrForSelf[1], location[1])
+    #                if dist < 2:
+    #                    stoneCounterForSelf = stoneCounterForSelf + 1
+    #                    #add the utility for the current player and subtract the utility for the opposing player
+    #                    #theSpot = board.boardList[location[0]][location[1]]
+    #                    if spot == turn:
+    #                        totalUtil += calcPathUtil(board, Vector(stoneArrForSelf[0], stoneArrForSelf[1]), getVector(location[0], stoneArrForSelf[0], location[1], stoneArrForSelf[1]), turn)
+    #                    if spot == oppTurn:
+    #                        totalUtil -= calcPathUtil(board, Vector(stoneArrForSelf[0], stoneArrForSelf[1]), getVector(location[0], stoneArrForSelf[0], location[1], stoneArrForSelf[1]), oppTurn)
+    #                    stoneArrForSelf = []
+    #                    stoneArrForSelf = location
+    #                elif dist > 1:
+    #                    stoneCounterForSelf = 0
+    #                    stoneArrForSelf.clear()
+    #    if x == y or (x < 0 and x == -y) or (x > 0 and x == 1-y):
+    #        dx, dy = -dy, dx
+    #    x, y = x+dx, y+dy
+    #
+    #return totalUtil
 
 ##localSpiral() will perform a spiraling search from the point that was found at (inputXPlaceOnBoard, inputYPlaceOnBoard).
 #The search will search up 2 cells away from the center point and will stop if it finds nothing
@@ -252,7 +291,7 @@ def BoardEval(board: Board, inputPlayerTurn: int):
 #                                                                                        2  |21↑|20←|19←|18←|17←|
 #                                                                                           +---+---+---+---+---+
 
-def localSpiral(X: int, Y: int, listOfPreviousMoves: list, inputXBoard: Board, inputXPlaceOnBoard: int, inputYPlaceOnBoard: int):
+def localSpiral(X: int, Y: int, inputXBoard: Board, inputXPlaceOnBoard: int, inputYPlaceOnBoard: int):
 
     # trueX and trueY are the x and y values associated with the real game board
     #this is because it can be thought of that spiral() analyzes a the game board a zoomed in manner
@@ -300,38 +339,52 @@ def localSpiral(X: int, Y: int, listOfPreviousMoves: list, inputXBoard: Board, i
 
     return ListOfPreviousPossibleMoves
 
+def localSpiralReplacement (col: int, row: int, board: BoardConfiguration):
+    possibleMoves = []
+    dists = {Vector(-2, 2),Vector(-1,2),Vector(0,2),Vector(1,2),Vector(2,2),Vector(-2,1),Vector(-1,1),Vector(0,1),Vector(1,1),Vector(2,1),Vector(-2,0),Vector(-1,0),Vector(1,0),Vector(2,0),Vector(-2,-1),Vector(-1,-1),Vector(0,-1),Vector(1,-1),Vector(2,-1),Vector(-2,-2),Vector(-1,-2),Vector(0,-2),Vector(1,-2),Vector(2,-2)}
+    for dist in dists:
+        newPos = Vector(col+dist.x,row+dist.y)
+        if inRange(newPos.x, newPos.y):
+            if board.boardList[newPos.x][newPos.y] == 0:
+                possibleMoves.append(newPos)
+    return possibleMoves
+
 #Calculates the utility value for a given path
 #boardState: The board configuration
 #startPos: The vector indicating the path's starting location
 #dir: The direction of the path
 #player: The player to calculate the util for
-def calcPathUtil (Board: BoardConfiguration, startPos: Vector, dir: Vector, player: int):
-    currentPos = Vector(startPos.x + dir.x, startPos.y + dir.y); #represents the current position in the search
-    pathLength = 1 #represents the length of the path
+def calcPathUtil (board: BoardConfiguration, startPos: Vector, dir: Vector, player: int):
+
+    currentPos = Vector(startPos.x + dir.x, startPos.y + dir.y) #represents the current position in the search
+    pathLength = 0 #represents the length of the path
     block = 0 #0 if path is not obstructed on either side, 1 if obstructed on 1 side, 2 if obstructed on both sides
     gap = False #bool representing if there is a gap
+    boardState = board.boardList
 
     #search in the positive direction
-    while currentPos.x < len(boardState) and currentPos.y < len(boardState[0]) and pathLength < 5: #makes sure the coords are within the bounds of the board
-        if boardState[currentPos.x][currentPos.y] == player:
+    while inRange(currentPos.x, currentPos.y) and pathLength < 5: #makes sure the coords are within the bounds of the board
+        if board.boardList[currentPos.x][currentPos.y] == player:
             pathLength += 1 #add to the running total for the current direction
-        elif boardState[currentPos.x][currentPos.y] != 0: #check to see if it is enemy piece
+        elif board.boardList[currentPos.x][currentPos.y] != 0: #check to see if it is enemy piece
             block += 1
             break;
-        else: #no piece present
+        elif board.boardList[currentPos.x][currentPos.y] == 0: #no piece present
             if not gap:
                 gap = True
             else:
+                #print("First while loop")
                 break #break out of the for loop if >1 gap is found
-        currentPos.x += 1;
-        currentPos.y += 1;
+        currentPos.x += dir.x
+        currentPos.y += dir.y
+        #print("first while: " + str(dir.x) + ", " + str(dir.y))
 
         #todo implement turns
 
     currentPos = Vector(startPos.x - dir.x, startPos.y - dir.y); #begin search in other direction
 
     #search in the negative direction
-    while currentPos.x > 0 and currentPos.y > 0 and pathLength < 5: #makes sure the coords are within the bounds of the board
+    while inRange(currentPos.x, currentPos.y) and pathLength < 5: #makes sure the coords are within the bounds of the board
         if boardState[currentPos.x][currentPos.y] == player:
             pathLength += 1 #add to the running total for the current direction
         elif boardState[currentPos.x][currentPos.y] != 0: #check to see if it is enemy piece
@@ -340,15 +393,21 @@ def calcPathUtil (Board: BoardConfiguration, startPos: Vector, dir: Vector, play
         else: #no piece present
             if not gap:
                 gap = True
+                #print("second while bool: " + str(gap))
+
             else:
+                #print("Second Break")
                 break #break out of the for loop if >1 gap is found
-        currentPos.x -= 1
-        currentPos.y -= 1
+        currentPos.x -= dir.x
+        currentPos.y -= dir.y
+        #print("second while: " + str(dir.x) + ", " + str(dir.y))
+
+    pathLength += 1 #path length is incremented because all adjacent stones to the starting stone are counted, but the starting stone itself is not
 
     #return the appropriate eval values based on the path
     if pathLength == 5:
-       return pathEvalValues.FIVE
-    if block == 2 and not gap: #if the path is obstructed on both sides and there is no gap in the middle, the position is worth nothing
+       return pathEvalValues.FIVE.value
+    if block >= 2 and not gap: #if the path is obstructed on both sides and there is no gap in the middle, the position is worth nothing
         return 0
 
     live: bool #indicates if the path is being evaluated as live or not
@@ -358,98 +417,99 @@ def calcPathUtil (Board: BoardConfiguration, startPos: Vector, dir: Vector, play
     #if no gap exists, it can only be live if there is no block on either side
 
     if pathLength == 4:
-        return pathEvalValues.LIVEFOUR if live else pathEvalValues.DEADFOUR #ternary to check if the path is live or not
+        return pathEvalValues.LIVEFOUR.value if live else pathEvalValues.DEADFOUR.value #ternary to check if the path is live or not
     elif pathLength == 3:
-        return pathEvalValues.LIVETHREE if live else pathEvalValues.DEADTHREE
+        return pathEvalValues.LIVETHREE.value if live else pathEvalValues.DEADTHREE.value
     elif pathLength == 2:
-        return pathEvalValues.LIVETWO if live else pathEvalValues.DEADTWO
+        return pathEvalValues.LIVETWO.value if live else pathEvalValues.DEADTWO.value
     elif pathLength <= 1: #any path <= 1 in length is not worth anything
         return 0
     return 0
 
-def IsGameOver(inputBoardState: Board, inputCurrentpathEvalValues: pathEvalValues):
-    theGame =  inputBoardState
-    pointState = inputBoardState.utility
-    gameOver = None
-    currentPointVals = inputCurrentpathEvalValues
+def IsGameOver(inputBoardState: BoardConfiguration):
+    boardConfig = inputBoardState.boardList
+    for i in range(len(boardConfig)):
+        for j in range(len(boardConfig[i])):
+            if boardConfig[i][j] != 0:
+                currentVal = boardConfig[i][j]
+                directions = {Vector(1,0), Vector(0,1), Vector(1,1), Vector(-1,0), Vector(-1,1), Vector(0,-1), Vector(-1,-1), Vector(1,-1)}
+                for direction in directions:
+                    newPos = Vector(i+direction.x,j+direction.y)
+                    if inRange(newPos.x,newPos.y):
+                        if boardConfig[newPos.x][newPos.y] == currentVal:
+                            if calcPathUtil(inputBoardState, Vector(i,j), direction, currentVal) == pathEvalValues.FIVE.value:
+                                return True
+                    
+    return False
 
-    if pointState <= 0:
-        gameOver = False
-
-    if currentPointVals.FIVE == someValueRepresentingEvalAssociatedWithWinning: #input value here that represents when we win
-        gameOver = True
-
-    return gameOver
 #------------------------------------------------------------------
 
 #Algorithms
 #------------------------------------------------------------------
-def MiniMaxConAlphaBetaPruning(inputTreeNode: MiniMaxNode, inputStartingMove: Move, inputDepth: int, inputAlpha, inputBeta, inputPlayerTurn: bool):
-    global decisionTree
-    gameOver = IsGameOver(inputTreeNode.move.moveXBoardConfig, eval) #TODO: implement that beh Bryan pls explain purpose of eval
+
+#function that ensures an ordered pair is within the bounds of the board
+def inRange(col, row):
+    return col >= 0 and col < 15 and row >= 0 and row < 15
+
+#def getNextMoveNode(inputNode: MiniMaxNode):
+#    smallestChild = 
+#    for child in inputNode.children:
+#        child 
+#    print("implement getNextMoveNode() to get this working")
+
+def MiniMaxConAlphaBetaPruning(inputNode: MiniMaxNode, inputDepth: int, inputAlpha, inputBeta, inputPlayerTurn: bool):
+    gameOver = IsGameOver(inputNode.currentMove.moveXBoardConfig)
     alpha = inputAlpha
     beta = inputBeta
-    infinity = math.INF
-    negInfinity = -math.INF
-
-    if moveNum == 0 or moveNum == 1
-        startingNode = MakeStartingNode(inputStartingMove)
-        decisionTree = CreateTree(startingNode, inputDepth)
-        inputTreeNode = descisionTree
-
-    if moveNum > 1:
-
+    infinity = math.inf
+    negInfinity = -math.inf
+    currentPlayerTurn = 1 if inputPlayerTurn else 2 #ternary baby
 
     if inputDepth == 0 or gameOver:
-        return inputTreeNode.move
+        print("inputDepth: " + str(inputDepth))
+        if inputNode.currentMove.player != 2:
+            inputNode.currentMove.utility = BoardEval(inputNode.currentMove.moveXBoardConfig, currentPlayerTurn)
+            print("inputDepth: " + str(inputDepth) + " - " + "The Move: " + "(" + str(inputNode.currentMove.col) + ", " + str(inputNode.currentMove.col) + ")") 
+            return inputNode
 
-    if inputPlayerTurn:
+        else:
+            print("tried to root Node")
+            #print("root Node move: " + str(inputNode.currentMove.col) + ", " + str(inputNode.currentMove.col))
+
+    if inputPlayerTurn and inputDepth >= 0:
+        print("inputDepth: " + str(inputDepth))
         maxEval = negInfinity
-        maxNode = MiniMaxNode(parent = , children = , currentVal = , currentMove = , evalForNextMove = ) #TODO create a node with infinity and then
 
-        for child in startingNode.children:
-            aNode = MiniMaxConAlphaBetaPruning(inputBoard, child, inputDepth - 1, alpha, beta, False)
-            maxEval = max(maxEval, aNode.currentVal)
-            maxNode = #whatever was just deemed the best
+        for child in inputNode.children:
+            aNode = MiniMaxConAlphaBetaPruning(child, inputDepth - 1, inputAlpha, inputBeta, False)
+            #theNode = getNextMoveNode(aNode)
+
+            if aNode.currentVal > maxEval:
+                maxEval = aNode.currentVal
+                maxNode = aNode
+
             alpha = max(alpha, aNode.currentVal)
-
             if beta <= alpha:
                 break
 
         return maxNode
-    else:
-        minEval = inifinity
 
-        for child in startingNode.children:
-            aNode = Minimax(child, inputDepth - 1, alpha, beta, True)
-            minEval = min(minEval, aNode.currentVal)
+    elif not inputPlayerTurn and inputDepth >= 0:
+        minEval = infinity
+
+        for child in inputNode.children:
+            aNode = MiniMaxConAlphaBetaPruning(child, inputDepth - 1, inputAlpha, inputBeta, True)
+            #theNode = getNextMoveNode(aNode)
+
+            if aNode.currentVal < minEval:
+                minEval = aNode.currentVal
+                minNode = aNode
 
             beta = min(beta, aNode.currentVal)
             if beta <= alpha:
                 break
 
-        return minEval
-
-def MiniMax(inputMove, inputDepth, inputGameOver):
-    #if the input depth is met or the game is over out put the evaluation of how good the move last made was
-    gameOver = inputGameOver
-    if inputDepth == 0 or gameOver:
-        positionEval = calcPathUtil()
-        return positionEval #nodes associated with evals
-
-    if inputMaximizingPlayer: #this is a boolean value
-        maxEval = -math.INF
-
-        for child in inputMove:
-            eval = MiniMax(child, inputDepth - 1, false)
-            maxEval = max(maxEval, eval)
-            return maxEval
-    else:
-        minEval = math.inf
-        for child in inputMove:
-            eval = MiniMax(child, depth - 1, true)
-            minEval = min(minEval, eval)
-            return minEval
+        return minNode
 #------------------------------------------------------------------
 
 #------------------------------------------------------------------
@@ -489,10 +549,15 @@ def UCB1(node):
 
 ##function to output file with the move of our agent
 #format: <groupname> <column> <row>
-def OutputFile(inputRow: chr, inputCol: int):
+def OutputFile(inputCol: int, inputRow: int):
+    colLetter = NumberToLetter(inputCol)
     f = open(paths.move_file, "w")
-    f.write("Sigmoid {} {}\n".format(inputCol, inputRow))
-    f.close
+    strToWrite = "Sigmoid " + colLetter + " " + str(inputRow)
+    f.write(strToWrite)
+    f.close()
+    f = open(paths.move_file, "r")
+    result = f.read()
+    f.close()
 
     return f
 
@@ -503,17 +568,19 @@ def OutputFile(inputRow: chr, inputCol: int):
 #         2->B
 #         3->C
 def NumberToLetter(inputColAsNumber: int):
-    theLetter = chr(ord('@') + inputColAsNumber)
+    theLetter = chr(ord('A') + inputColAsNumber)
     return theLetter
 
 ##The opposite of NumberToLetter. It takes in a letter and converts it
 #into a number
 def LetterToNumber(inputColAsLetter: chr):
+    inputColAsLetter = inputColAsLetter.upper()
     theNumber = ord(inputColAsLetter) - ord('@')
-    return theNumber
+    return theNumber - 1
 
 #------------------------------------------------------------------
 
 #Run the program
 if __name__ == '__main__':
     main()
+    
