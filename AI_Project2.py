@@ -57,7 +57,12 @@ def makeMove(board : Board):
 
     else:
         OppPlayerNode = MakeStartingNode(board)
-        theMove = MiniMaxConAlphaBetaPruning(CreateTree(OppPlayerNode, 1), 1, math.inf, -math.inf, False).currentMove #TODO: implement function that will dynamically determine input depth based off time left and moveNum
+        alpha = MiniMaxNode(parent = None, children = None, currentVal = -1000000, currentMove = None)
+        beta = MiniMaxNode(parent = None, children = None, currentVal = 1000000, currentMove = None)
+        theMove = MiniMaxConAlphaBetaPruning(CreateTree(OppPlayerNode, 1), 2, alpha, beta, True).currentMove #TODO: implement function that will dynamically determine input depth based off time left and moveNum
+        print('here')
+        print(theMove)
+        print('there')
         print(str(theMove.col) + " " + str(theMove.row))
         board.placeStone(theMove.col, theMove.row, theMove.utility, 1, moveNum)
         OutputFile(theMove.col, theMove.row)
@@ -92,13 +97,16 @@ def MakeStartingNode(inputBoard: Board):
 
 #Creates the tree for minimax algorithm to running
 #input starting move, depthlimit
-def CreateTree(inputCurrentRootNode: MiniMaxNode, currentDepth: int):
+def CreateTree(inputCurrentRootNode, currentDepth: int):
     rootNode = inputCurrentRootNode
     if inputCurrentRootNode.currentMove.player == 2:
         rootNode.children = CreateChildrenForTree(inputCurrentRootNode.currentMove, currentDepth, 1)
     else:
         rootNode.children = CreateChildrenForTree(inputCurrentRootNode.currentMove, currentDepth, 1)
-
+    # print(rootNode.children)
+    # print(rootNode.children[0].children[0])
+    # print(rootNode.children[0].children[0][0])
+    # print(rootNode.children[0].children)
     return rootNode
 
 def CreateChildrenForTree(prevMove: Move, currentDepth: int, currentTurn: int):
@@ -121,11 +129,11 @@ def CreateChildrenForTree(prevMove: Move, currentDepth: int, currentTurn: int):
         treeSize += 1
 
         for i in range(len(children)):
+            spotInChildList = children[i]
             for j in range(len(childMoves)):
-                spotInChildList = children[i]
                 spotInChildList.children[j] = CreateChildrenForTree(spotInChildList.children[j], currentDepth - 1, oppTurn)
 
-    print("Tree size: " + str(treeSize))
+    # print("Tree size: " + str(treeSize))
     return children
 
 ## genPossibleMoves will iterate through an entire board and find all possible moves that are within 2 spaces of any given piece
@@ -457,58 +465,78 @@ def inRange(col, row):
 #        child
 #    print("implement getNextMoveNode() to get this working")
 
-def MiniMaxConAlphaBetaPruning(inputNode: MiniMaxNode, inputDepth: int, inputAlpha, inputBeta, inputPlayerTurn: bool):
+def MiniMaxConAlphaBetaPruning(inputNode, inputDepth: int, alpha, beta, inputPlayerTurn: bool):
+    print('final')
+    #stupid problem requires stupid solution
+    if type(inputNode) is list:
+        inputNode = inputNode[0]
+
     gameOver = IsGameOver(inputNode.currentMove.moveXBoardConfig)
-    alpha = inputAlpha
-    beta = inputBeta
-    infinity = math.inf
-    negInfinity = -math.inf
+    infinity = 1000000
+    negInfinity = -1000000
     currentPlayerTurn = 1 if inputPlayerTurn else 2 #ternary baby
 
+    #check if leaf node
+    print("inputDepth: " + str(inputDepth))
     if inputDepth == 0 or gameOver:
-        print("inputDepth: " + str(inputDepth))
+        # print('here2')
         if inputNode.currentMove.player != 2:
             inputNode.currentMove.utility = BoardEval(inputNode.currentMove.moveXBoardConfig, currentPlayerTurn)
             print("inputDepth: " + str(inputDepth) + " - " + "The Move: " + "(" + str(inputNode.currentMove.col) + ", " + str(inputNode.currentMove.col) + ")")
-            return inputNode
+            # print(inputNode)
+            return inputNode #TODO maybe change this to the value or figure out a way to pass the value
 
         else:
             print("tried to root Node")
             #print("root Node move: " + str(inputNode.currentMove.col) + ", " + str(inputNode.currentMove.col))
 
+    #if maximizing player
     if inputPlayerTurn and inputDepth >= 0:
-        print("inputDepth: " + str(inputDepth))
-        maxEval = negInfinity
-
+        maxNode = MiniMaxNode(parent = None, children = None, currentVal = negInfinity, currentMove = None)
+        print('this')
+        print(inputNode.children)
         for child in inputNode.children:
-            aNode = MiniMaxConAlphaBetaPruning(child, inputDepth - 1, inputAlpha, inputBeta, False)
+            #stupid problem requires stupid solution
+            if type(child) is list:
+                child = child[0]
+            print('max')
+            aNode = MiniMaxConAlphaBetaPruning(child, inputDepth - 1, alpha, beta, False)
             #theNode = getNextMoveNode(aNode)
-
-            if aNode.currentVal > maxEval:
-                maxEval = aNode.currentVal
+            if aNode.currentVal > maxNode.currentVal:
                 maxNode = aNode
 
-            alpha = max(alpha, aNode.currentVal)
-            if beta <= alpha:
-                break
+            if maxNode.currentVal > alpha.currentVal:
+                alpha = maxNode
 
+            if beta.currentVal <= alpha.currentVal:
+                break
+        print(maxNode.currentMove)
+        print('maxNode')
+        print('anode below')
+        print(aNode.currentMove.col)
         return maxNode
 
+    #if minimizing player
     elif not inputPlayerTurn and inputDepth >= 0:
-        minEval = infinity
-
+        minNode = MiniMaxNode(parent = None, children = None, currentVal = infinity, currentMove = None)
         for child in inputNode.children:
-            aNode = MiniMaxConAlphaBetaPruning(child, inputDepth - 1, inputAlpha, inputBeta, True)
+            #stupid problem requires stupid solution
+            if type(child) is list:
+                child = child[0]
+            print('min')
+            aNode = MiniMaxConAlphaBetaPruning(child, inputDepth - 1, alpha, beta, True)
             #theNode = getNextMoveNode(aNode)
 
-            if aNode.currentVal < minEval:
-                minEval = aNode.currentVal
+            if aNode.currentVal < minNode.currentVal:
                 minNode = aNode
 
-            beta = min(beta, aNode.currentVal)
-            if beta <= alpha:
-                break
+            if minNode.currentVal < beta.currentVal:
+                beta = minNode
 
+            if beta.currentVal <= alpha.currentVal:
+                break
+        # print(minNode)
+        # print('minNode')
         return minNode
 #------------------------------------------------------------------
 
@@ -529,108 +557,108 @@ def TaperedSearch():
 #https://en.wikipedia.org/wiki/Monte_Carlo_tree_search
 
 ##################################################################
-# def MonteCarloTreeSearch(currentState):
-#     #TODO: i didnt add something to the mNode so that it knows what move it is supposed to do, right now it only checks for the best move but it doesnt know how to recreate it on the board, i.e: place piece in G 7, it doesnt do that but it has the currentboard state to differ it from the other one, or not actually, i need to discuss this with collin
-#     highest = mNode()
-#     highest.n = 0
-#     father = mNode()
-#     father.n = 0
-#     #TODO implement a function to get the children of the mnodes, probably a good idea would be to implement this in the class itself and initialize with it. Maybe use some form of local spiral to get a set amount of children, and preferably make the choice of moves based on the local spiral randomized, aka: dont spin the whole thing, just randomly choose 3 places to spin it based on weight (how many in a row)
-#     mNodeList = [father] + father.children
-#
-#     #TODO: add while loop that runs for 9.5 secs
-#     while(x < 9.5seconds):
-#
-#         #checks for the mNode with the highest UCB value to expand
-#         for x in mNodeList:
-#             if x.n == math.inf:
-#                 highest = x
-#                 break
-#             val = UCB(x)
-#             highval = UCB(highest)
-#             if val > highval:
-#                 highest = val
-#
-#         tval, son = expansion(highest, [highest])
-#
-#         #backpropagation section of Monte Carlo
-#         father.n += 1
-#         father.t += tval
-#         mNodeList[0] = father
-#         for x in son:
-#             #note, checking for infinity in any node is unnecesary, the highest UCB would be the one with the first infinite value anyway so the result would be the same. However, it saves us computation time.
-#             if x.n == math.inf:
-#                 x.n = 1
-#                 x.t = tval
-#                 mNodeList.append(x)
-#             else:
-#                 index = mNodeList.index(x)
-#                 x.t += tval
-#                 x.n += 1
-#                 mNodeList[index] = x
-#
-#     #when we get here its because we ran out of time to find cool solutions so we check for the child of mNode with the highest ucb and return that as the move
-#     best = mNode()
-#     best.n = 0
-#     for child in mNode.children:
-#         finalVal = UCB(child)
-#         bestUCB = UCB(best)
-#         if finalVal > bestUCB:
-#             best = child
-#     return best.currentBoard
-# #####montecarlo Helpers
-#
-# #Calculates values used to determine what leaf to explore
-# def UCB(mNode):
-#     wi = mNode.t #number of wins after simualtion start
-#     N = mNode.parent.n # number of times parent monteNode was simulated
-#     ni = mNode.n #number of times child monteNode was simulated
-#     ucb = wi/ni + 2*math.sqrt((np.log(N))/ni)
-#
-#     return ucb
-#
-# #Chooses random child of monteNode to explore until terminal state reached
-# #returns count of how many nodes are explored until terminal state
-# def rollout(mNode):
-#     curr_mNode = mNode
-#     distance = 0
-#     #TODO: How do you get the value in the rollut. What exactly is it?????
-#     while(True):
-#         distance += 1
-#         if IsGameOver(curr_mNode.currentBoard):
-#             return distance
-#         else:
-#             #TODO generate children for curr_mNode, just like in montecarlo
-#             randChoice = random(curr_mNode.children)
-#             curr_mNode = randChoice
-#
-# #expands the tree for search
-# def expansion(mNode, explored):
-#
-#     #if unexplored rollout
-#     if mNode.n is math.inf:
-#         tval = rollout(mNode)
-#         return tval, explored
-#
-#     highest = mNode()
-#     highest.n = 0
-#
-#     #TODO: generate child for mnode just like in montecarlo
-#
-#     #if already explored, check if all children have been explored as well and if so pick child with highest UCB to repeat this process
-#     #if theres an unexplored child explore that child or else choose child with biggest UCB to repeat this cycle
-#     for x in mNode.children:
-#         if x.n == math.inf:
-#             explored.append(x)
-#             tval = rollout(x)
-#             return tval, explored
-#         val = UCB(x)
-#         highval = UCB(highest)
-#         if val > highval:
-#             highest = val
-#     #basically, if every child has already been explored explore deeper and check for an unexplored child to rollout
-#     explored.append(highest)
-#     expansion(highest, explored)
+def MonteCarloTreeSearch(currentState):
+    #TODO: i didnt add something to the mNode so that it knows what move it is supposed to do, right now it only checks for the best move but it doesnt know how to recreate it on the board, i.e: place piece in G 7, it doesnt do that but it has the currentboard state to differ it from the other one, or not actually, i need to discuss this with collin
+    highest = mNode()
+    highest.n = 0
+    father = mNode()
+    father.n = 0
+    #TODO implement a function to get the children of the mnodes, probably a good idea would be to implement this in the class itself and initialize with it. Maybe use some form of local spiral to get a set amount of children, and preferably make the choice of moves based on the local spiral randomized, aka: dont spin the whole thing, just randomly choose 3 places to spin it based on weight (how many in a row)
+    mNodeList = [father] + father.children
+
+    #TODO: add while loop that runs for 9.5 secs
+    while(x < 9.5seconds):
+
+        #checks for the mNode with the highest UCB value to expand
+        for x in mNodeList:
+            if x.n == math.inf:
+                highest = x
+                break
+            val = UCB(x)
+            highval = UCB(highest)
+            if val > highval:
+                highest = val
+
+        tval, son = expansion(highest, [highest])
+
+        #backpropagation section of Monte Carlo
+        father.n += 1
+        father.t += tval
+        mNodeList[0] = father
+        for x in son:
+            #note, checking for infinity in any node is unnecesary, the highest UCB would be the one with the first infinite value anyway so the result would be the same. However, it saves us computation time.
+            if x.n == math.inf:
+                x.n = 1
+                x.t = tval
+                mNodeList.append(x)
+            else:
+                index = mNodeList.index(x)
+                x.t += tval
+                x.n += 1
+                mNodeList[index] = x
+
+    #when we get here its because we ran out of time to find cool solutions so we check for the child of mNode with the highest ucb and return that as the move
+    best = mNode()
+    best.n = 0
+    for child in mNode.children:
+        finalVal = UCB(child)
+        bestUCB = UCB(best)
+        if finalVal > bestUCB:
+            best = child
+    return best.currentBoard
+#####montecarlo Helpers
+
+#Calculates values used to determine what leaf to explore
+def UCB(mNode):
+    wi = mNode.t #number of wins after simualtion start
+    N = mNode.parent.n # number of times parent monteNode was simulated
+    ni = mNode.n #number of times child monteNode was simulated
+    ucb = wi/ni + 2*math.sqrt((np.log(N))/ni)
+
+    return ucb
+
+#Chooses random child of monteNode to explore until terminal state reached
+#returns count of how many nodes are explored until terminal state
+def rollout(mNode):
+    curr_mNode = mNode
+    distance = 0
+    #TODO: How do you get the value in the rollut. What exactly is it?????
+    while(True):
+        distance += 1
+        if IsGameOver(curr_mNode.currentBoard):
+            return distance
+        else:
+            #TODO generate children for curr_mNode, just like in montecarlo
+            randChoice = random(curr_mNode.children)
+            curr_mNode = randChoice
+
+#expands the tree for search
+def expansion(mNode, explored):
+
+    #if unexplored rollout
+    if mNode.n is math.inf:
+        tval = rollout(mNode)
+        return tval, explored
+
+    highest = mNode()
+    highest.n = 0
+
+    #TODO: generate child for mnode just like in montecarlo
+
+    #if already explored, check if all children have been explored as well and if so pick child with highest UCB to repeat this process
+    #if theres an unexplored child explore that child or else choose child with biggest UCB to repeat this cycle
+    for x in mNode.children:
+        if x.n == math.inf:
+            explored.append(x)
+            tval = rollout(x)
+            return tval, explored
+        val = UCB(x)
+        highval = UCB(highest)
+        if val > highval:
+            highest = val
+    #basically, if every child has already been explored explore deeper and check for an unexplored child to rollout
+    explored.append(highest)
+    expansion(highest, explored)
 
 ##################################################################
 #------------------------------------------------------------------

@@ -85,16 +85,16 @@ class pathEvalValues(Enum):
     LIVETWO = 5
     DEADTWO = 4
 
-# class monteNode:
-#     parent : 'monteNode'
-#     currentBoard: BoardConfiguration
-#     children: list #
-#     t: int #keeps track of the value to terminal state
-#     n: int  #number of times node has been visited
-#
-#     def __init__(self, parent, children, currentVal, currentMove, currentBoard, t):
-#         self.parent = parent
-#         self.currentBoard = currentBoard
-#         self.children = children
-#         self.t = 0
-#         self.n = math.inf
+class monteNode:
+    parent : 'monteNode'
+    currentBoard: BoardConfiguration
+    children: list #
+    t: int #keeps track of the value to terminal state
+    n: int  #number of times node has been visited
+
+    def __init__(self, parent, children, currentVal, currentMove, currentBoard, t):
+        self.parent = parent
+        self.currentBoard = currentBoard
+        self.children = children
+        self.t = 0
+        self.n = math.inf
