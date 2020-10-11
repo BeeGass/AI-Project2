@@ -1,0 +1,8 @@
+class Net {
+
+public:
+
+private:
+
+
+};
