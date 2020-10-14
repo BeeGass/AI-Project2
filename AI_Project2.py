@@ -1,9 +1,7 @@
 import time
 from os import path
-import copy
-import math, paths
+import math, paths, copy, sys
 from Board import Board, Vector, BoardConfiguration, pathEvalValues, Move, MiniMaxNode
-import math, paths
 #import numpy as np
 groupName = "Sigmoid"
 moveNum = 0 #The move number in the game
@@ -14,6 +12,10 @@ treeSize = 0
 #------------------------------------------------------------------
 
 def main():
+    global groupName
+    if len(sys.argv) > 1:
+        groupName = str(sys.argv[1]) #gets the command line argument and sets the groupname
+        print(groupName)
     PlayGame(Board()) #0 for tie, 1 for AI player wins, 2 for opposing player wins
 
 #Function which will play the Gomoku game until completion
@@ -21,7 +23,7 @@ def main():
 def PlayGame(board):
     #exit(0)
     global moveNum
-    while not path.exists(paths.goFile): #waits until it is the player's move
+    while not path.exists(groupName + ".go"): #waits until it is the player's move
         pass
     if path.exists(paths.endgame): #end of game
         print("End of game")
@@ -52,7 +54,7 @@ def makeMove(board : Board):
     #first move shit that im not sure of. Pseudo code
     if moveNum == 0 or moveNum == 1:
         makefirstMove(board)
-        OutputFile(7, 7)
+        OutputFile(0, 0)
         print("outputted the first move")
 
     else:
@@ -81,9 +83,11 @@ def makefirstMove(board: Board):
 #output MinimaxNode
 def MakeStartingNode(inputBoard: Board):
     global moveNum
+    firstNode: MiniMaxNode
 
     if not inputBoard.savedMovesOpp:
         theMove = Move(player = 2, col = -1, row = -1, utility = -1, board = inputBoard.currentGameState, moveNum = moveNum)
+        firstNode = MiniMaxNode(parent = None, children = None, currentVal = -1, currentMove = theMove)
     else:
         theMove = inputBoard.savedMovesOpp[-1]
         print("Saved moves opp")
@@ -194,7 +198,7 @@ def getVector(x2: int, x1: int, y2: int, y1: int):
 def BoardEval(board: BoardConfiguration, inputPlayerTurn: int):
     oppTurn = 2 if inputPlayerTurn == 1 else 1 #assigns opponent turn to opposite of current turn
     totalUtil = 0
-    directions = {Vector(1,0), Vector(0,1), Vector(1,1), Vector(-1,0), Vector(-1,1), Vector(0,-1), Vector(-1,-1), Vector(1,-1)}
+    directions = {Vector(1,0), Vector(0,1), Vector(1,1), Vector(-1,1)}
 
     for move in board.occupiedSpaces:
         for direction in directions:
@@ -202,61 +206,6 @@ def BoardEval(board: BoardConfiguration, inputPlayerTurn: int):
             totalUtil -= calcPathUtil(board = board, startPos = move, dir = direction, player = oppTurn)
 
     return totalUtil
-
-    #X = 15
-    #Y = 15
-
-    #turn = inputPlayerTurn
-    #oppTurn = 2 if turn == 1 else 1 #assigns opponent turn to opposite of current turn
-    #totalUtil = 0 #the utility value to return
-
-    #x = 0
-    #y = 0
-    #dx = 0
-    #dy = -1
-    #adjX = 0
-    #adjY = 0
-
-    #stoneArrForOpp = []
-    #stoneCounterForOpp = 0
-
-    #stoneArrForSelf = []
-    #stoneCounterForSelf = 0
-
-    #for i in range(max(X, Y)**2):
-    #    if (int(-X/2) <= x <=  (int(X/2) + 1)) and (int(-Y/2) <= y <= (int(Y/2) + 1)):
-    #        location = []
-    #        #TODO shoudnt adjX and adjY be lists containing a coordinate? Given that the board is a 2d array
-    #        adjX = x+7
-    #        adjY = y+7
-    #        location.append(adjX)
-    #        location.append(adjY)
-
-    #        spot = board.boardList[adjX][adjY]
-
-    #        if spot != 0:
-    #            if not stoneArrForSelf:
-    #                stoneArrForSelf = location
-    #            elif stoneArrForSelf:
-    #                dist = getDistance(stoneArrForSelf[0], location[0], stoneArrForSelf[1], location[1])
-    #                if dist < 2:
-    #                    stoneCounterForSelf = stoneCounterForSelf + 1
-    #                    #add the utility for the current player and subtract the utility for the opposing player
-    #                    #theSpot = board.boardList[location[0]][location[1]]
-    #                    if spot == turn:
-    #                        totalUtil += calcPathUtil(board, Vector(stoneArrForSelf[0], stoneArrForSelf[1]), getVector(location[0], stoneArrForSelf[0], location[1], stoneArrForSelf[1]), turn)
-    #                    if spot == oppTurn:
-    #                        totalUtil -= calcPathUtil(board, Vector(stoneArrForSelf[0], stoneArrForSelf[1]), getVector(location[0], stoneArrForSelf[0], location[1], stoneArrForSelf[1]), oppTurn)
-    #                    stoneArrForSelf = []
-    #                    stoneArrForSelf = location
-    #                elif dist > 1:
-    #                    stoneCounterForSelf = 0
-    #                    stoneArrForSelf.clear()
-    #    if x == y or (x < 0 and x == -y) or (x > 0 and x == 1-y):
-    #        dx, dy = -dy, dx
-    #    x, y = x+dx, y+dy
-    #
-    #return totalUtil
 
 ##localSpiral() will perform a spiraling search from the point that was found at (inputXPlaceOnBoard, inputYPlaceOnBoard).
 #The search will search up 2 cells away from the center point and will stop if it finds nothing
@@ -478,6 +427,7 @@ def MiniMaxConAlphaBetaPruning(inputNode, inputDepth: int, alpha, beta, inputPla
         # print('here2')
         if inputNode.currentMove.player != 2:
             inputNode.currentMove.utility = BoardEval(inputNode.currentMove.moveXBoardConfig, currentPlayerTurn)
+            inputNode.currentVal = inputNode.currentMove.utility
             print("inputDepth: " + str(inputDepth) + " - " + "The Move: " + "(" + str(inputNode.currentMove.col) + ", " + str(inputNode.currentMove.col) + ")")
             # print(inputNode)
             return inputNode #TODO maybe change this to the value or figure out a way to pass the value
@@ -557,15 +507,15 @@ def MonteCarloTreeSearch(currentState):
     #TODO: add while loop that runs for 9.5 secs
     while(time < 9.5seconds):
 
-        #checks for the mNode with the highest UCB value to expand
-        for x in mNodeList:
-            if x.n == math.inf:
-                highest = x
-                break
-            val = UCB(x)
-            highval = UCB(highest)
-            if val > highval:
-                highest = val
+#        #checks for the mNode with the highest UCB value to expand
+#        for x in mNodeList:
+#            if x.n == math.inf:
+#                highest = x
+#                break
+#            val = UCB(x)
+#            highval = UCB(highest)
+#            if val > highval:
+#                highest = val
 
         tval, son = expansion(highest, [highest]) #tval is the new rollout value that is to be added to expanded nodes during this run. Son is the list of expanded children
 
@@ -607,7 +557,7 @@ def UCB(mNode):
     ni = mNode.n #number of times child monteNode was simulated
     ucb = wi/ni + 2*math.sqrt((np.log(N))/ni)
 
-    return ucb
+#    return ucb
 
 #Chooses random child of monteNode to explore until terminal state reached
 #returns count of how many nodes are explored until terminal state
@@ -624,35 +574,35 @@ def rollout(mNode):
             randChoice = random(curr_mNode.children)
             curr_mNode = randChoice
 
-#expands the tree for search
-def expansion(mNode, explored):
+##expands the tree for search
+#def expansion(mNode, explored):
 
-    #if unexplored rollout
-    if mNode.n is math.inf:
-        tval = rollout(mNode)
-        return tval, explored
+#    #if unexplored rollout
+#    if mNode.n is math.inf:
+#        tval = rollout(mNode)
+#        return tval, explored
 
-    highest = mNode()
-    highest.n = 0
+#    highest = mNode()
+#    highest.n = 0
 
-    #TODO: generate child for mnode just like in montecarlo
+#    #TODO: generate child for mnode just like in montecarlo
 
-    #if already explored, check if all children have been explored as well and if so pick child with highest UCB to repeat this process
-    #if theres an unexplored child explore that child or else choose child with biggest UCB to repeat this cycle
-    for x in mNode.children:
-        if x.n == math.inf:
-            explored.append(x)
-            tval = rollout(x)
-            return tval, explored
-        val = UCB(x)
-        highval = UCB(highest)
-        if val > highval:
-            highest = val
-    #basically, if every child has already been explored explore deeper and check for an unexplored child to rollout
-    explored.append(highest)
-    expansion(highest, explored)
+#    #if already explored, check if all children have been explored as well and if so pick child with highest UCB to repeat this process
+#    #if theres an unexplored child explore that child or else choose child with biggest UCB to repeat this cycle
+#    for x in mNode.children:
+#        if x.n == math.inf:
+#            explored.append(x)
+#            tval = rollout(x)
+#            return tval, explored
+#        val = UCB(x)
+#        highval = UCB(highest)
+#        if val > highval:
+#            highest = val
+#    #basically, if every child has already been explored explore deeper and check for an unexplored child to rollout
+#    explored.append(highest)
+#    expansion(highest, explored)
 
-##################################################################
+###################################################################
 #------------------------------------------------------------------
 
 #File helper functions
@@ -662,8 +612,9 @@ def expansion(mNode, explored):
 #format: <groupname> <column> <row>
 def OutputFile(inputCol: int, inputRow: int):
     colLetter = NumberToLetter(inputCol)
+    rowNumber = inputRow + 1
     f = open(paths.move_file, "w")
-    strToWrite = "Sigmoid " + colLetter + " " + str(inputRow)
+    strToWrite = groupName + " " + colLetter + " " + str(rowNumber)
     f.write(strToWrite)
     f.close()
     f = open(paths.move_file, "r")
