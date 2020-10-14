@@ -679,15 +679,16 @@ def OutputFile(inputCol: int, inputRow: int):
 #         2->B
 #         3->C
 def NumberToLetter(inputColAsNumber: int):
-    theLetter = chr(ord('A') + inputColAsNumber)
+    theLetter = chr(97 + inputColAsNumber)
+    theLetter = theLetter.upper()
     return theLetter
 
 ##The opposite of NumberToLetter. It takes in a letter and converts it
 #into a number
 def LetterToNumber(inputColAsLetter: chr):
-    inputColAsLetter = inputColAsLetter.upper()
-    theNumber = ord(inputColAsLetter) - ord('@')
-    return theNumber - 1
+    inputColAsLetter = inputColAsLetter.lower()
+    theNumber = ord(inputColAsLetter) - 97
+    return theNumber
 
 #------------------------------------------------------------------
 
