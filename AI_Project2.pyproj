@@ -21,10 +21,8 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\Desktop\Board.py">
-      <Link>Board.py</Link>
-    </Compile>
     <Compile Include="AI_Project2.py" />
+    <Compile Include="Board.py" />
     <Compile Include="HumanDriver.py">
       <SubType>Code</SubType>
     </Compile>

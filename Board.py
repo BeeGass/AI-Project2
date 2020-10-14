@@ -25,30 +25,28 @@ class Board:
     #col: The column
     #Player: 1 if AI player, 2 if opponent
     #Returns true if move was successful, false otherwise
-    def placeStone(self, col, row, utility, player, moveNum):
+    def placeStone(self, col, row, player, moveNum):
         if self.currentGameState.boardList[col][row] != 0 and moveNum != 1: #if the spot on the board is taken and it is not the second
             #move of the game (where placing a piece over another is a legal move)
             return False
         self.currentGameState.placeStone(col, row, player)
         if player == 1:
-            self.savedMovesSelf.append(Move(player, col, row, utility, self.currentGameState, 0))
+            self.savedMovesSelf.append(Move(player, col, row, self.currentGameState, 0))
         if player == 2:
-            self.savedMovesOpp.append(Move(player, col, row, utility, self.currentGameState, 0))
+            self.savedMovesOpp.append(Move(player, col, row, self.currentGameState, 0))
         return True
 
 class Move: #class representing a move made by either player
     player: int #the player that made the move
     col: int #the row the piece was placed in
     row: int #the column the piece was placed in
-    utility: float #the utility represented by the move
     moveXBoardConfig : BoardConfiguration #the board configuration after the move has been made
     moveNum: int #the move number in the game
 
-    def __init__(self, player, col, row, utility, board, moveNum):
+    def __init__(self, player, col, row, board, moveNum):
         self.player = player
         self.col = col
         self.row = row
-        self.utility = utility
         self.moveXBoardConfig = board
         self.moveNum = moveNum
 
@@ -60,7 +58,6 @@ class Vector:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-
 
 class MiniMaxNode:
     parent : 'MiniMaxNode' #collection of arbitrary moves to current aribitrary point
