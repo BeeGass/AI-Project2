@@ -1,6 +1,5 @@
-import time
 from os import path
-import math, paths, copy, sys
+import math, paths, copy, sys, time
 from Board import Board, Vector, BoardConfiguration, pathEvalValues, Move, MiniMaxNode
 #import numpy as np
 groupName = "Sigmoid"
@@ -48,7 +47,7 @@ def PlayGame(board):
     #make move here
     makeMove(board)
     print("Turn "+str(moveNum)+" completed.")
-    time.sleep(.5) #wait 100 ms to make sure the go file has been deleted before continuing
+    time.sleep(1) #wait 100 ms to make sure the go file has been deleted before continuing
     board = PlayGame(board) #repeats until game completion
 
 #Gets the optimal move using the minimax algorithm with alpha-beta pruning and performs the move
@@ -61,7 +60,14 @@ def makeMove(board : Board):
         OppPlayerNode = MakeStartingNode(board)
         alpha = MiniMaxNode(parent = None, children = None, currentVal = -1000000, currentMove = None)
         beta = MiniMaxNode(parent = None, children = None, currentVal = 1000000, currentMove = None)
-        theMove = MiniMaxConAlphaBetaPruning(CreateTree(OppPlayerNode, 1), 2, alpha, beta, True).currentMove #TODO: implement function that will dynamically determine input depth based off time left and moveNum
+        t0 = time.clock()
+        print("Creating tree. . .")
+        tree = CreateTree(inputCurrentRootNode = OppPlayerNode, currentDepth = 5)
+        print("Create tree took " + str(time.clock()-t0) + " seconds")
+        t0 = time.clock()
+        print("Running minimax. . .")
+        theMove = MiniMaxConAlphaBetaPruning(tree, 3, alpha, beta, True).currentMove #TODO: implement function that will dynamically determine input depth based off time left and moveNum
+        print("Minimax took "+str(time.clock() - t0)+"seconds")
         board.placeStone(theMove.col, theMove.row, 1, moveNum)
         OutputFile(theMove.col, theMove.row)
 
@@ -95,14 +101,7 @@ def MakeStartingNode(inputBoard: Board):
 #input starting move, depthlimit
 def CreateTree(inputCurrentRootNode, currentDepth: int):
     rootNode = inputCurrentRootNode
-    if inputCurrentRootNode.currentMove.player == 2:
-        rootNode.children = CreateChildrenForTree(inputCurrentRootNode.currentMove, currentDepth, 1)
-    else:
-        rootNode.children = CreateChildrenForTree(inputCurrentRootNode.currentMove, currentDepth, 1)
-    # print(rootNode.children)
-    # print(rootNode.children[0].children[0])
-    # print(rootNode.children[0].children[0][0])
-    # print(rootNode.children[0].children)
+    rootNode.children = CreateChildrenForTree(inputCurrentRootNode.currentMove, currentDepth, 2)
     return rootNode
 
 def CreateChildrenForTree(prevMove: Move, currentDepth: int, currentTurn: int):
@@ -419,16 +418,8 @@ def MiniMaxConAlphaBetaPruning(inputNode, inputDepth: int, alpha, beta, inputPla
     #check if leaf node
     #print("inputDepth: " + str(inputDepth))
     if inputDepth == 0 or gameOver:
-        # print('here2')
-        if inputNode.currentMove.player != 2:
-            inputNode.currentVal = BoardEval(inputNode.currentMove.moveXBoardConfig, currentPlayerTurn)
-            #print("inputDepth: " + str(inputDepth) + " - " + "The Move: " + "(" + str(inputNode.currentMove.col) + ", " + str(inputNode.currentMove.col) + ")")
-            # print(inputNode)
-            return inputNode #TODO maybe change this to the value or figure out a way to pass the value
-
-        else:
-            print("tried to root Node")
-            #print("root Node move: " + str(inputNode.currentMove.col) + ", " + str(inputNode.currentMove.col))
+        inputNode.currentVal = BoardEval(inputNode.currentMove.moveXBoardConfig, currentPlayerTurn)
+        return inputNode
 
     #if maximizing player
     if inputPlayerTurn and inputDepth >= 0:
