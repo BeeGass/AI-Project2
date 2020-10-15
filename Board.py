@@ -60,21 +60,21 @@ class Vector:
         self.y = y
 
 class MiniMaxNode:
-    parent : 'MiniMaxNode' #collection of arbitrary moves to current aribitrary point
-    children: list #collection of arbitrary moves representing arbitrary amount of children
+    #parent : 'MiniMaxNode' #collection of arbitrary moves to current aribitrary point
+    #children: list #collection of arbitrary moves representing arbitrary amount of children
     currentVal: int #the metric for utility
     currentMove: Move #the move so as to reference the board state later on
 
-    def __init__(self, parent, children, currentVal, currentMove):
-        self.parent = parent
-        self.children = children
+    def __init__(self, currentVal, currentMove):
+        # parent, children,
+        #self.parent = parent
+        #self.children = children
         self.currentVal = currentVal
         self.currentMove = currentMove
 
 #Enum representing the evaluation values for each path type for calcPathUtil
 class pathEvalValues(Enum):
     FIVE = 100000 #five in a row
-    #TODO fill values
     LIVEFOUR = 1000
     DEADFOUR = 500
     LIVETHREE = 90

@@ -65,7 +65,7 @@ def makeMove(board : Board):
         print("Create tree took " + str(time.clock()-t0) + " seconds")
         t0 = time.clock()
         print("Running minimax. . .")
-        theMove = MiniMaxConAlphaBetaPruning(tree, 2, alpha, beta, True).currentMove #TODO: implement function that will dynamically determine input depth based off time left and moveNum
+        theMove = miniMax(tree, 2, alpha, beta, True).currentMove #TODO: implement function that will dynamically determine input depth based off time left and moveNum
         print("Minimax took "+str(time.clock() - t0)+"seconds")
         board.placeStone(theMove.col, theMove.row, 1, moveNum)
         OutputFile(theMove.col, theMove.row)
@@ -397,44 +397,53 @@ def IsGameOver(inputBoardState: BoardConfiguration):
 def inRange(col, row):
     return col >= 0 and col < 15 and row >= 0 and row < 15
 
-#def getNextMoveNode(inputNode: MiniMaxNode):
-#    smallestChild =
-#    for child in inputNode.children:
-#        child
-#    print("implement getNextMoveNode() to get this working")
+def alphaBetaPruning(depth: int, alpha: int, beta: int, inputPlayerTurn: bool):
 
-def MiniMaxConAlphaBetaPruning(inputNode, inputDepth: int, alpha, beta, inputPlayerTurn: bool):
+    pass
+
+def miniMax(inputNode, inputDepth: int, alpha, beta, inputPlayerTurn: bool):
     #stupid problem requires stupid solution
     if type(inputNode) is list:
         inputNode = inputNode[0]
 
-    gameOver = IsGameOver(inputNode.currentMove.moveXBoardConfig)
+    #gameOver = IsGameOver(inputNode.currentMove.moveXBoardConfig)
     infinity = 1000000000000
     negInfinity = -1000000000000
-    currentPlayerTurn = 1 if inputPlayerTurn else 2 #ternary baby
+    currentTurn = 1 if inputPlayerTurn else 2 #ternary baby
+
+    validMoves = genPossibleMoves(inputNode.children, currentTurn)
 
     #check if leaf node
-    #print("inputDepth: " + str(inputDepth))
     if inputDepth == 0: #or gameOver:
-        inputNode.currentVal = BoardEval(inputNode.currentMove.moveXBoardConfig, currentPlayerTurn)
+        inputNode.currentVal = BoardEval(inputNode.currentMove.moveXBoardConfig, currentTurn)
         return inputNode
+
+    maxNode = MiniMaxNode(parent = None, children = None, currentVal = -math.inf, currentMove = None)
+    maxEval = maxNode.currentVal
+    for move in ValidMoves:
+        currentEval = alphaBetaPruning(....) #TBD
+        if (currentEval > maxScore):
+            maxNode = MiniMaxNode(currentEval, move)
+            maxEval = maxNode.currentVal
+    return maxNode
 
     #if maximizing player
     if inputPlayerTurn and inputDepth >= 0:
-        maxNode = MiniMaxNode(parent = None, children = None, currentVal = negInfinity, currentMove = None)
-        for child in inputNode.children:
-            if type(child) is list:
-                child = child[0]
-            aNode = MiniMaxConAlphaBetaPruning(child, inputDepth - 1, alpha, beta, False)
-            #theNode = getNextMoveNode(aNode)
-            if aNode.currentVal > maxNode.currentVal:
-                maxNode = aNode
+        maxNode = MiniMaxNode(parent = None, children = None, currentVal = -math.inf, currentMove = None)
+        #for child in inputNode.children:
+        #    if type(child) is list:
+        #        child = child[0]
+        #    aNode = miniMax(child, inputDepth - 1, alpha, beta, False)
+        #    #theNode = getNextMoveNode(aNode)
+        #    if aNode.currentVal > maxNode.currentVal:
+        #        maxNode = aNode
 
-            if maxNode.currentVal > alpha.currentVal:
-                alpha = maxNode
+        #    if maxNode.currentVal > alpha.currentVal:
+        #        alpha = maxNode
 
-            if beta.currentVal <= alpha.currentVal:
-                break
+        #    if beta.currentVal <= alpha.currentVal:
+        #        break
+            
 
         return maxNode
 
@@ -445,7 +454,7 @@ def MiniMaxConAlphaBetaPruning(inputNode, inputDepth: int, alpha, beta, inputPla
 
             if type(child) is list:
                 child = child[0]
-            aNode = MiniMaxConAlphaBetaPruning(child, inputDepth - 1, alpha, beta, True)
+            aNode = miniMax(child, inputDepth - 1, alpha, beta, True)
             #theNode = getNextMoveNode(aNode)
 
             if aNode.currentVal < minNode.currentVal:
