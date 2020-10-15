@@ -33,7 +33,6 @@ def PlayGame(board):
     else:
         #read opponent's move here
         if path.exists(paths.move_file):
-            moveNum += 1
             f = open(paths.move_file).read()
             lines = f.split()
             if not lines == []:
@@ -43,6 +42,7 @@ def PlayGame(board):
                     board.placeStone(col, row, 2, moveNum) #makes opponent move
                     print("Read opponent's move "+str(moveNum))
                     print(lines[1]+" "+lines[2]);
+                    moveNum += 1
     #make move here
     makeMove(board)
     print("Turn "+str(moveNum)+" completed.")
@@ -53,20 +53,15 @@ def PlayGame(board):
 #board: The current game board
 def makeMove(board : Board):
     global moveNum
+    print("Making move " + str(moveNum))
     if moveNum == 0 or moveNum == 1:
         makefirstMove(board)
     else:
-        OppPlayerNode = MakeStartingNode(board)
-        alpha = MiniMaxNode(parent = None, children = None, currentVal = -1000000, currentMove = None)
-        beta = MiniMaxNode(parent = None, children = None, currentVal = 1000000, currentMove = None)
-        t0 = time.clock()
-        print("Creating tree. . .")
-        tree = CreateTree(inputCurrentRootNode = OppPlayerNode, currentDepth = 2)
-        print("Create tree took " + str(time.clock()-t0) + " seconds")
-        t0 = time.clock()
-        print("Running minimax. . .")
-        theMove = miniMax(tree, 2, alpha, beta, True).currentMove #TODO: implement function that will dynamically determine input depth based off time left and moveNum
-        print("Minimax took "+str(time.clock() - t0)+"seconds")
+        time1 = time.clock()
+        startingNode = MakeStartingNode(board)
+        theMove = miniMax(startingNode, 2, math.inf, -math.inf, True).currentMove #TODO: implement function that will dynamically determine input depth based off time left and moveNum
+        print("Made move "+str(theMove.col)+" "+str(theMove.row))
+        print("Made move in "+str(time.clock() - time1)+"seconds")
         board.placeStone(theMove.col, theMove.row, 1, moveNum)
         OutputFile(theMove.col, theMove.row)
 
@@ -93,40 +88,13 @@ def MakeStartingNode(inputBoard: Board):
     else:
         theMove = inputBoard.savedMovesOpp[-1]
 
-    firstNode = MiniMaxNode(parent = None, children = None, currentVal = -1, currentMove = theMove)
+    firstNode = MiniMaxNode(currentVal = -1, currentMove = theMove)
     return firstNode
-
-#Creates the tree for minimax algorithm to running
-#input starting move, depthlimit
-def CreateTree(inputCurrentRootNode, currentDepth: int):
-    rootNode = inputCurrentRootNode
-    rootNode.children = CreateChildrenForTree(inputCurrentRootNode.currentMove, currentDepth, 2)
-    return rootNode
-
-def CreateChildrenForTree(prevMove: Move, currentDepth: int, inputPlayerTurn: bool):
-    oppTurn: int
-    children = []
-    childMoves: list
-    emptyChild = []
-
-    currentTurn = 1 if inputPlayerTurn else 2 #sets the currentTurn based on the boolean value
-    childMoves = genPossibleMoves(prevMove, currentTurn)
-
-    if (currentDepth <= 0): #at bottom layer of tree
-        pass
-        #children.append(MiniMaxNode(parent  = prevMove, children = emptyChild, currentVal = -1, currentMove = prevMove))
-    elif (currentDepth > 0):
-        for move in childMoves:
-            newNode = MiniMaxNode(parent = prevMove, children = None, currentVal = -1, currentMove = move)
-            newNode.children = CreateChildrenForTree(prevMove = move, currentDepth = currentDepth - 1, inputPlayerTurn = not inputPlayerTurn)
-            children.append(newNode)
-
-    return children
 
 ## genPossibleMoves will iterate through an entire board and find all possible moves that are within 2 spaces of any given piece
 def genPossibleMoves(inputMove: Move, player: int):
-    print("Started genPossibleMoves")
-    #TODO fix NoneType for inputMove.moveXBoardConfig
+    newPlayer = 1 if player == 2 else 2
+
     inputXBoard = inputMove.moveXBoardConfig
     theNumber = inputMove.moveNum + 1
 
@@ -150,8 +118,6 @@ def genPossibleMoves(inputMove: Move, player: int):
             newBoard.occupiedSpaces = copy.deepcopy(inputXBoard.occupiedSpaces)
             newBoard.placeStone(move.x, move.y, player)
             ListOfAllPossibleMoves.append(Move(player, col = move.x, row = move.y, board = newBoard, moveNum = theNumber))
-    print("Finished genPossibleMoves")
-    print("Generated " + str(len(ListOfAllPossibleMoves)) + "moves")
     return ListOfAllPossibleMoves #returns all possible moves
 #------------------------------------------------------------------
 
@@ -226,7 +192,7 @@ def BoardEval(board: BoardConfiguration, inputPlayerTurn: int):
 #                                                                                           +---+---+---+---+---+
 def localSpiral(inputXBoard: Board, inputXPlaceOnBoard: int, inputYPlaceOnBoard: int):
 
-    X = 3
+    X = 3#WERE BOTH 3
     Y = 3
 
     # trueX and trueY are the x and y values associated with the real game board
@@ -397,77 +363,98 @@ def IsGameOver(inputBoardState: BoardConfiguration):
 def inRange(col, row):
     return col >= 0 and col < 15 and row >= 0 and row < 15
 
-def alphaBetaPruning(depth: int, alpha: int, beta: int, inputPlayerTurn: bool):
-
-    pass
-
-def miniMax(inputNode, inputDepth: int, alpha, beta, inputPlayerTurn: bool):
+def alphaBetaPruning(inputNode: MiniMaxNode, inputDepth: int, alpha: int, beta: int, inputPlayerTurn: bool):
     #stupid problem requires stupid solution
     if type(inputNode) is list:
         inputNode = inputNode[0]
 
-    #gameOver = IsGameOver(inputNode.currentMove.moveXBoardConfig)
-    infinity = 1000000000000
-    negInfinity = -1000000000000
     currentTurn = 1 if inputPlayerTurn else 2 #ternary baby
-
-    validMoves = genPossibleMoves(inputNode.children, currentTurn)
 
     #check if leaf node
     if inputDepth == 0: #or gameOver:
-        inputNode.currentVal = BoardEval(inputNode.currentMove.moveXBoardConfig, currentTurn)
         return inputNode
 
-    maxNode = MiniMaxNode(parent = None, children = None, currentVal = -math.inf, currentMove = None)
-    maxEval = maxNode.currentVal
-    for move in ValidMoves:
-        currentEval = alphaBetaPruning(....) #TBD
-        if (currentEval > maxScore):
-            maxNode = MiniMaxNode(currentEval, move)
-            maxEval = maxNode.currentVal
+    time0 = time.clock()
+    validMoves = genPossibleMoves(inputMove = inputNode.currentMove, player = currentTurn)
+    print("genPossibleMoves ran in "+str(time.clock()-time0)+" seconds")
+
+    if inputPlayerTurn:
+        maxNode = MiniMaxNode(currentVal = -math.inf, currentMove = None)
+        for move in validMoves:
+            currentNode = alphaBetaPruning(inputNode = MiniMaxNode(-1, move), inputDepth = inputDepth-1, alpha = alpha, beta = beta, inputPlayerTurn = False)
+            time0 = time.clock()
+            currentNode.currentVal = BoardEval(currentNode.currentMove.moveXBoardConfig, currentTurn)
+            print("BoardEval ran in "+str(time.clock()-time0)+" seconds")
+            if (currentNode.currentVal > maxNode.currentVal):
+                maxNode = currentNode
+            alpha = max(maxNode.currentVal, alpha)
+            if beta <= alpha:
+                break
+        return maxNode
+    else:
+        minNode = MiniMaxNode(currentVal = math.inf, currentMove = None)
+        for move in validMoves:
+            currentNode = alphaBetaPruning(inputNode = MiniMaxNode(-1, move), inputDepth = inputDepth-1, alpha = alpha, beta = beta, inputPlayerTurn = True)
+            currentNode.currentVal = BoardEval(currentNode.currentMove.moveXBoardConfig, currentTurn)
+            if (currentNode.currentVal < minNode.currentVal):
+                minNode = currentNode
+            beta = min(minNode.currentVal, beta)
+            if beta <= alpha:
+                break
+        return minNode
+
+def miniMax(inputNode: MiniMaxNode, inputDepth: int, alpha, beta, inputPlayerTurn: bool):
+    currentTurn = 1 if inputPlayerTurn else 2 #ternary baby
+    validMoves = genPossibleMoves(inputMove = inputNode.currentMove, player = currentTurn)
+
+    maxNode = MiniMaxNode(currentVal = -math.inf, currentMove = None)
+    for move in validMoves:
+        currentNode = alphaBetaPruning(inputNode = MiniMaxNode(-1, move), inputDepth = inputDepth, alpha = -math.inf, beta = math.inf, inputPlayerTurn = True)
+        if (currentNode.currentVal > maxNode.currentVal):
+            maxNode = currentNode
     return maxNode
 
-    #if maximizing player
-    if inputPlayerTurn and inputDepth >= 0:
-        maxNode = MiniMaxNode(parent = None, children = None, currentVal = -math.inf, currentMove = None)
-        #for child in inputNode.children:
-        #    if type(child) is list:
-        #        child = child[0]
-        #    aNode = miniMax(child, inputDepth - 1, alpha, beta, False)
-        #    #theNode = getNextMoveNode(aNode)
-        #    if aNode.currentVal > maxNode.currentVal:
-        #        maxNode = aNode
+    ##if maximizing player
+    #if inputPlayerTurn and inputDepth >= 0:
+    #    maxNode = MiniMaxNode(parent = None, children = None, currentVal = -math.inf, currentMove = None)
+    #    #for child in inputNode.children:
+    #    #    if type(child) is list:
+    #    #        child = child[0]
+    #    #    aNode = miniMax(child, inputDepth - 1, alpha, beta, False)
+    #    #    #theNode = getNextMoveNode(aNode)
+    #    #    if aNode.currentVal > maxNode.currentVal:
+    #    #        maxNode = aNode
 
-        #    if maxNode.currentVal > alpha.currentVal:
-        #        alpha = maxNode
+    #    #    if maxNode.currentVal > alpha.currentVal:
+    #    #        alpha = maxNode
 
-        #    if beta.currentVal <= alpha.currentVal:
-        #        break
+    #    #    if beta.currentVal <= alpha.currentVal:
+    #    #        break
             
 
-        return maxNode
+    #    return maxNode
 
-    #if minimizing player
-    elif not inputPlayerTurn and inputDepth >= 0:
-        minNode = MiniMaxNode(parent = None, children = None, currentVal = infinity, currentMove = None)
-        for child in inputNode.children:
+    ##if minimizing player
+    #elif not inputPlayerTurn and inputDepth >= 0:
+    #    minNode = MiniMaxNode(parent = None, children = None, currentVal = infinity, currentMove = None)
+    #    for child in inputNode.children:
 
-            if type(child) is list:
-                child = child[0]
-            aNode = miniMax(child, inputDepth - 1, alpha, beta, True)
-            #theNode = getNextMoveNode(aNode)
+    #        if type(child) is list:
+    #            child = child[0]
+    #        aNode = miniMax(child, inputDepth - 1, alpha, beta, True)
+    #        #theNode = getNextMoveNode(aNode)
 
-            if aNode.currentVal < minNode.currentVal:
-                minNode = aNode
+    #        if aNode.currentVal < minNode.currentVal:
+    #            minNode = aNode
 
-            if minNode.currentVal < beta.currentVal:
-                beta = minNode
+    #        if minNode.currentVal < beta.currentVal:
+    #            beta = minNode
 
-            if beta.currentVal <= alpha.currentVal:
-                break
-        # print(minNode)
-        # print('minNode')
-        return minNode
+    #        if beta.currentVal <= alpha.currentVal:
+    #            break
+    #    # print(minNode)
+    #    # print('minNode')
+    #    # return minNode
 #------------------------------------------------------------------
 
 ##function to output file with the move of our agent

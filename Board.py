@@ -77,7 +77,7 @@ class pathEvalValues(Enum):
     FIVE = 100000 #five in a row
     LIVEFOUR = 1000
     DEADFOUR = 500
-    LIVETHREE = 90
-    DEADTHREE = 30
+    LIVETHREE = 100
+    DEADTHREE = 50
     LIVETWO = 10
     DEADTWO = 5
