@@ -116,9 +116,34 @@ def genPossibleMoves(inputMove: Move, player: int):
             newBoard = BoardConfiguration()
             newBoard.boardList = copy.deepcopy(inputXBoard.boardList)
             newBoard.occupiedSpaces = copy.deepcopy(inputXBoard.occupiedSpaces)
-            newBoard.placeStone(move.x, move.y, player)
+            newBoard.placeStone(move.x, move.y, player) 
             ListOfAllPossibleMoves.append(Move(player, col = move.x, row = move.y, board = newBoard, moveNum = theNumber))
     return ListOfAllPossibleMoves #returns all possible moves
+
+def genPossibleMoves2(inputMove: Move, player: int):
+    possibleMoves = []
+    board = inputMove.moveXBoardConfig
+    boundaryList = [(1,0),(0,1),(1,1),(-1,1)]
+    for vector in boundaryList:
+        posMove = (inputMove.col+vector[0],inputMove.row+vector[1])
+        negMove = (inputMove.col-vector[0],inputMove.row-vector[1])
+        if inRange(posMove[0], posMove[1]):
+            if board.boardList[posMove[0]][posMove[1]] == 0:
+                newBoard = BoardConfiguration()
+                newBoard.boardList = copy.deepcopy(board.boardList)
+                newBoard.occupiedSpaces = copy.deepcopy(board.occupiedSpaces)
+                newBoard.placeStone(posMove[0], posMove[1], player)
+                possibleMoves.append(Move(player = player, col = posMove[0], row = posMove[1], board = newBoard, moveNum = -1))
+        if inRange(negMove[0], negMove[1]):
+            if board.boardList[negMove[0]][negMove[1]] == 0:
+                newBoard = BoardConfiguration()
+                newBoard.boardList = copy.deepcopy(board.boardList)
+                newBoard.occupiedSpaces = copy.deepcopy(board.occupiedSpaces)
+                newBoard.placeStone(negMove[0], negMove[1], player)
+                possibleMoves.append(Move(player = player, col = negMove[0], row = negMove[1], board = newBoard, moveNum = -1))
+    return possibleMoves
+
+
 #------------------------------------------------------------------
 
 #Math helper functions
@@ -267,7 +292,6 @@ def localSpiralReplacement (col: int, row: int, board: BoardConfiguration):
 #dir: The direction of the path
 #player: The player to calculate the util for
 def calcPathUtil (board: BoardConfiguration, startPos: Vector, dir: Vector, player: int):
-
     currentPos = Vector(startPos.x + dir.x, startPos.y + dir.y) #represents the current position in the search
     pathLength = 0 #represents the length of the path
     block = 0 #0 if path is not obstructed on either side, 1 if obstructed on 1 side, 2 if obstructed on both sides
@@ -285,7 +309,7 @@ def calcPathUtil (board: BoardConfiguration, startPos: Vector, dir: Vector, play
             if not gap:
                 gap = True
             else:
-                #print("First while loop")
+                gap = False
                 break #break out of the for loop if >1 gap is found
         currentPos.x += dir.x
         currentPos.y += dir.y
@@ -305,14 +329,11 @@ def calcPathUtil (board: BoardConfiguration, startPos: Vector, dir: Vector, play
         else: #no piece present
             if not gap:
                 gap = True
-                #print("second while bool: " + str(gap))
-
             else:
-                #print("Second Break")
+                gap = False
                 break #break out of the for loop if >1 gap is found
         currentPos.x -= dir.x
         currentPos.y -= dir.y
-        #print("second while: " + str(dir.x) + ", " + str(dir.y))
 
     pathLength += 1 #path length is incremented because all adjacent stones to the starting stone are counted, but the starting stone itself is not
 
@@ -370,12 +391,14 @@ def alphaBetaPruning(inputNode: MiniMaxNode, inputDepth: int, alpha: int, beta: 
 
     currentTurn = 1 if inputPlayerTurn else 2 #ternary baby
 
+    gameOver = IsGameOver(inputBoardState = inputNode.currentMove.moveXBoardConfig)
+    
     #check if leaf node
-    if inputDepth == 0: #or gameOver:
+    if inputDepth == 0 or gameOver:
         return inputNode
 
     time0 = time.clock()
-    validMoves = genPossibleMoves(inputMove = inputNode.currentMove, player = currentTurn)
+    validMoves = genPossibleMoves2(inputMove = inputNode.currentMove, player = currentTurn)
     print("genPossibleMoves ran in "+str(time.clock()-time0)+" seconds")
 
     if inputPlayerTurn:
@@ -405,7 +428,7 @@ def alphaBetaPruning(inputNode: MiniMaxNode, inputDepth: int, alpha: int, beta: 
 
 def miniMax(inputNode: MiniMaxNode, inputDepth: int, alpha, beta, inputPlayerTurn: bool):
     currentTurn = 1 if inputPlayerTurn else 2 #ternary baby
-    validMoves = genPossibleMoves(inputMove = inputNode.currentMove, player = currentTurn)
+    validMoves = genPossibleMoves2(inputMove = inputNode.currentMove, player = currentTurn)
 
     maxNode = MiniMaxNode(currentVal = -math.inf, currentMove = None)
     for move in validMoves:

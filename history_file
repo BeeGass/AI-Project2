@@ -1,0 +1,12 @@
+Relu h 8
+Sigmoid h 8
+Relu h 11
+Sigmoid h 9
+Relu k 8
+Sigmoid i 9
+Relu j 9
+Sigmoid l 12
+Relu i 11
+Sigmoid k 11
+Relu g 11
+Sigmoid j 10
