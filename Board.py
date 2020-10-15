@@ -73,25 +73,11 @@ class MiniMaxNode:
 
 #Enum representing the evaluation values for each path type for calcPathUtil
 class pathEvalValues(Enum):
-    FIVE = 10 #five in a row
+    FIVE = 100000 #five in a row
     #TODO fill values
-    LIVEFOUR = 9
-    DEADFOUR = 8
-    LIVETHREE = 7
-    DEADTHREE = 6
-    LIVETWO = 5
-    DEADTWO = 4
-
-class monteNode:
-    parent : 'monteNode'
-    currentMove: Move
-    children: list #
-    t: int #keeps track of the value to terminal state
-    n: int  #number of times node has been visited
-
-    def __init__(self, parent, children, currentVal, currentMove, currentBoard, t):
-        self.parent = parent
-        self.children = children
-        self.t = 0
-        self.n = math.inf
-        self.currentMove = Move
+    LIVEFOUR = 1000
+    DEADFOUR = 500
+    LIVETHREE = 90
+    DEADTHREE = 30
+    LIVETWO = 10
+    DEADTWO = 5
